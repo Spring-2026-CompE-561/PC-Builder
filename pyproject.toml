@@ -1,0 +1,17 @@
+[project]
+name = "pc-builder"
+version = "0.1.0"
+description
+readme = "README.MD"
+requires-python = ">=3.13"
+dependencies = [
+
+]
+
+[project dependencies]
+dev = [
+
+]
+[build-system]
+requires = 
+build-backend = 
