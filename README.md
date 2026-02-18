@@ -9,7 +9,7 @@ PC-Builder is a website that takes in a user's budget, preferences, and use case
 - Allow users to export builds for later.
 ## Optional Upgrades
 - Basic user registration/login, allowing users to view/edit/delete saved builds.
-- Display most popular parts from users.
+- Display the most popular parts from users.
 - Compare two builds side-by-side.
 - Live price tracking.
 - Build templates.
