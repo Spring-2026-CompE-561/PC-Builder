@@ -1,6 +1,6 @@
-﻿# PC-Builder
+﻿# PC Builder
 ## Overview 
-PC-Builder is a website that takes in a user's budget, preferences, and use case, and recommends the best possible PC components. The goal is to simplify the PC buying and building process, especially for beginners.
+PC Builder is a website that takes in a user's budget, preferences, and use case, and recommends the best possible PC components. The goal is to simplify the PC buying and building process, especially for beginners.
 ## Core Features
 - Accepts user budget, use case, brand preferences, aesthetic preferences, and other details.
 - Generates a recommended build.
