@@ -1,0 +1,918 @@
+openapi: 3.0.3
+info:
+  title: PC Builder Backend API
+  version: 1.0.0
+  description: >
+    REST API for PC Builder — PC Builder is a web application that helps users plan a 
+    custom PC by recommending components based on their budget, use case, and preferences 
+    (such as brand, aesthetics, and required features). The app generates a complete suggested 
+    build and shows the total cost along with a per-part price breakdown. Users can search 
+    and filter parts by price and specs, swap components, and adjust quantities to fine-tune 
+    their build. Builds can be exported for later use, with optional upgrades like user 
+    accounts, popular-part insights, and price tracking.
+
+servers:
+  - url: http://localhost:8000
+    description: FastAPI (local dev)
+
+paths:
+  /api/auth/register:
+    post:
+      summary: Create a new user account
+      tags: [Auth]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/RegisterRequest"
+      responses:
+        "201":
+          description: User created
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  user:
+                    $ref: "#/components/schemas/UserPublic"
+        "409":
+          description: Duplicate email
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "422":
+          description: Validation error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /api/auth/login:
+    post:
+      summary: Authenticates the user and returns an access token
+      tags: [Auth]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/LoginRequest"
+      responses:
+        "200":
+          description: Login success
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  token:
+                    type: string
+                    example: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+                  user:
+                    $ref: "#/components/schemas/UserPublic"
+        "401":
+          description: Invalid credentials
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "422":
+          description: Validation error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /api/auth/logout:
+    post:
+      summary: Logs out the current user
+      tags: [Auth]
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: Logged out
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SuccessResponse"
+        "401":
+          description: Missing/invalid token
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /api/users/me:
+    get:
+      summary: Gets the current logged-in profile
+      tags: [Users]
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: Current user profile
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UserMe"
+        "401":
+          description: Missing/invalid token
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+    put:
+      summary: Updates user info and preferences
+      tags: [Users]
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdateUserMeRequest"
+      responses:
+        "200":
+          description: User updated
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  user:
+                    $ref: "#/components/schemas/UserMe"
+        "401":
+          description: Missing/invalid token
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "422":
+          description: Validation error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+    delete:
+      summary: Deletes account
+      tags: [Users]
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: Account deleted
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SuccessResponse"
+        "401":
+          description: Missing/invalid token
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /api/parts:
+    get:
+      summary: Retrieves and filters parts
+      tags: [Parts]
+      parameters:
+        - name: category
+          in: query
+          required: false
+          schema:
+            $ref: "#/components/schemas/PartCategory"
+        - name: brand
+          in: query
+          required: false
+          schema:
+            type: string
+        - name: min_price
+          in: query
+          required: false
+          schema:
+            type: number
+            format: float
+            minimum: 0
+        - name: max_price
+          in: query
+          required: false
+          schema:
+            type: number
+            format: float
+            minimum: 0
+        - name: search
+          in: query
+          required: false
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Filtered list of parts
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Part"
+        "422":
+          description: Validation error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /api/parts/{id}:
+    get:
+      summary: Retrieves specifics of the part
+      tags: [Parts]
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Part details
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Part"
+        "404":
+          description: Part not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /api/builds:
+    get:
+      summary: Pulls previous saved builds
+      tags: [Builds]
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: Saved builds
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/BuildSummary"
+        "401":
+          description: Missing/invalid token
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+    post:
+      summary: Saves a new build
+      tags: [Builds]
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateBuildRequest"
+      responses:
+        "201":
+          description: Build saved
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  build:
+                    $ref: "#/components/schemas/Build"
+        "401":
+          description: Missing/invalid token
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "422":
+          description: Validation error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /api/builds/{id}:
+    get:
+      summary: Retrieves specific build
+      tags: [Builds]
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Build details
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Build"
+        "401":
+          description: Missing/invalid token
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "403":
+          description: Unauthorized build access
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "404":
+          description: Build not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+    put:
+      summary: Updates saved build
+      tags: [Builds]
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdateBuildRequest"
+      responses:
+        "200":
+          description: Build updated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SuccessResponse"
+        "401":
+          description: Missing/invalid token
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "403":
+          description: Unauthorized build access
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "404":
+          description: Build not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "422":
+          description: Validation error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+    delete:
+      summary: Deletes a build
+      tags: [Builds]
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Build deleted
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SuccessResponse"
+        "401":
+          description: Missing/invalid token
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "403":
+          description: Unauthorized build access
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "404":
+          description: Build not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /api/recommendations:
+    post:
+      summary: Generates the recommended build
+      tags: [Recommendations]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/RecommendationRequest"
+      responses:
+        "200":
+          description: Recommendation generated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/RecommendationResponse"
+        "422":
+          description: Validation error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /api/recommendations/history:
+    get:
+      summary: Retrieves previous recommendations
+      tags: [Recommendations]
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: Recommendation history
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/RecommendationHistoryItem"
+        "401":
+          description: Missing/invalid token
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /api/favorites:
+    get:
+      summary: Gets favorited builds
+      tags: [Favorites]
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: Favorites list
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Favorite"
+        "401":
+          description: Missing/invalid token
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+    post:
+      summary: Favorites item
+      tags: [Favorites]
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateFavoriteRequest"
+      responses:
+        "201":
+          description: Favorited
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SuccessResponse"
+        "401":
+          description: Missing/invalid token
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "404":
+          description: Item not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "422":
+          description: Validation error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /api/favorites/{id}:
+    delete:
+      summary: Removes the favorited item
+      tags: [Favorites]
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Favorite removed
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SuccessResponse"
+        "401":
+          description: Missing/invalid token
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "403":
+          description: Not allowed
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "404":
+          description: Favorite not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+components:
+  schemas:
+    SuccessResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: true
+
+    ErrorResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: false
+        error:
+          type: string
+          example: "Error"
+        message:
+          type: string
+          example: "Something went wrong"
+
+    RegisterRequest:
+      type: object
+      properties:
+        name:
+          type: string
+          example: "Housain"
+        email:
+          type: string
+          format: email
+          example: "housain@example.com"
+        password:
+          type: string
+          example: "password123"
+      required: [name, email, password]
+
+    LoginRequest:
+      type: object
+      properties:
+        email:
+          type: string
+          format: email
+          example: "housain@example.com"
+        password:
+          type: string
+          example: "password123"
+      required: [email, password]
+
+    UserPublic:
+      type: object
+      properties:
+        id:
+          type: integer
+          example: 1
+        name:
+          type: string
+          example: "Housain"
+        email:
+          type: string
+          format: email
+          example: "housain@example.com"
+        created_at:
+          type: string
+          format: date-time
+          example: "2026-02-20T12:00:00Z"
+      required: [id, name, email, created_at]
+
+    Preferences:
+      type: object
+      description: User preferences (brand bias, aesthetics, required features, etc.)
+      additionalProperties: true
+      example:
+        brand_bias: ["AMD", "NVIDIA"]
+        aesthetics: "black RGB"
+        wifi_required: true
+
+    UserMe:
+      type: object
+      properties:
+        id:
+          type: integer
+          example: 1
+        name:
+          type: string
+          example: "Housain"
+        email:
+          type: string
+          format: email
+          example: "housain@example.com"
+        preferences:
+          $ref: "#/components/schemas/Preferences"
+      required: [id, name, email, preferences]
+
+    UpdateUserMeRequest:
+      type: object
+      properties:
+        name:
+          type: string
+        preferences:
+          $ref: "#/components/schemas/Preferences"
+
+    PartCategory:
+      type: string
+      enum: [CPU, GPU, Motherboard, RAM, Storage, PSU, Case, Cooler]
+      example: GPU
+
+    Part:
+      type: object
+      properties:
+        id:
+          type: integer
+          example: 101
+        category:
+          $ref: "#/components/schemas/PartCategory"
+        brand:
+          type: string
+          example: "NVIDIA"
+        model:
+          type: string
+          example: "RTX 4070 Super"
+        price:
+          type: number
+          format: float
+          minimum: 0
+          example: 599.99
+        specs:
+          type: object
+          additionalProperties: true
+          example:
+            vram_gb: 12
+            power_w: 220
+      required: [id, category, brand, model, price, specs]
+
+    BuildItemInput:
+      type: object
+      properties:
+        part_id:
+          type: integer
+          example: 101
+        quantity:
+          type: integer
+          minimum: 1
+          example: 1
+      required: [part_id, quantity]
+
+    BuildItem:
+      type: object
+      properties:
+        id:
+          type: integer
+          example: 5001
+        build_id:
+          type: integer
+          example: 900
+        part_id:
+          type: integer
+          example: 101
+        quantity:
+          type: integer
+          minimum: 1
+          example: 1
+      required: [id, build_id, part_id, quantity]
+
+    BuildSummary:
+      type: object
+      properties:
+        id:
+          type: integer
+          example: 900
+        name:
+          type: string
+          example: "Gaming Build"
+        total_cost:
+          type: number
+          format: float
+          example: 1487.42
+        created_at:
+          type: string
+          format: date-time
+          example: "2026-02-20T12:10:00Z"
+      required: [id, name, total_cost, created_at]
+
+    Build:
+      type: object
+      properties:
+        id:
+          type: integer
+          example: 900
+        name:
+          type: string
+          example: "Gaming Build"
+        items:
+          type: array
+          items:
+            $ref: "#/components/schemas/BuildItem"
+        total_cost:
+          type: number
+          format: float
+          example: 1487.42
+      required: [id, name, items, total_cost]
+
+    CreateBuildRequest:
+      type: object
+      properties:
+        name:
+          type: string
+          example: "My Build"
+        items:
+          type: array
+          items:
+            $ref: "#/components/schemas/BuildItemInput"
+      required: [name, items]
+
+    UpdateBuildRequest:
+      type: object
+      properties:
+        name:
+          type: string
+        items:
+          type: array
+          items:
+            $ref: "#/components/schemas/BuildItemInput"
+
+    # ---------- Recommendations ----------
+    RecommendationRequest:
+      type: object
+      properties:
+        budget:
+          type: number
+          format: float
+          minimum: 0
+          example: 1500
+        use_case:
+          type: string
+          example: "gaming"
+        preferences:
+          $ref: "#/components/schemas/Preferences"
+      required: [budget, use_case]
+
+    RecommendationBreakdownItem:
+      type: object
+      properties:
+        part_id:
+          type: integer
+          example: 101
+        category:
+          $ref: "#/components/schemas/PartCategory"
+        brand:
+          type: string
+          example: "NVIDIA"
+        model:
+          type: string
+          example: "RTX 4070 Super"
+        price:
+          type: number
+          format: float
+          example: 599.99
+      required: [part_id, category, brand, model, price]
+
+    RecommendationResponse:
+      type: object
+      properties:
+        custom_build:
+          type: object
+          properties:
+            items:
+              type: array
+              items:
+                $ref: "#/components/schemas/BuildItemInput"
+        total_cost:
+          type: number
+          format: float
+          example: 1487.42
+        breakdown:
+          type: array
+          items:
+            $ref: "#/components/schemas/RecommendationBreakdownItem"
+      required: [custom_build, total_cost, breakdown]
+
+    RecommendationHistoryItem:
+      type: object
+      properties:
+        id:
+          type: integer
+          example: 300
+        budget:
+          type: number
+          format: float
+          example: 1500
+        created_at:
+          type: string
+          format: date-time
+          example: "2026-02-20T12:20:00Z"
+      required: [id, budget, created_at]
+
+    FavoriteItemType:
+      type: string
+      enum: [build, part]
+      example: build
+
+    Favorite:
+      type: object
+      properties:
+        id:
+          type: integer
+          example: 700
+        item_type:
+          $ref: "#/components/schemas/FavoriteItemType"
+        item_id:
+          type: integer
+          example: 900
+      required: [id, item_type, item_id]
+
+    CreateFavoriteRequest:
+      type: object
+      properties:
+        item_type:
+          $ref: "#/components/schemas/FavoriteItemType"
+        item_id:
+          type: integer
+          example: 900
+      required: [item_type, item_id]
+
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
