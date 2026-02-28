@@ -1,6 +1,9 @@
 ﻿# PC Builder
 ## Overview 
 PC Builder is a website that takes in a user's budget, preferences, and use case, and recommends the best possible PC components. The goal is to simplify the PC buying and building process, especially for beginners.
+
+>MVP: A one-page website where an user can enter a budget and some basic preferences, and get one recommended, compatible PC build with a total price and per-part breakdown, plus a way to export it.
+
 ### Core Features
 - Accepts user budget, use case, brand preferences, aesthetic preferences, and other details.
 - Generates a recommended build.
@@ -13,6 +16,15 @@ PC Builder is a website that takes in a user's budget, preferences, and use case
 - Compare two builds side-by-side.
 - Live price tracking.
 - Build templates.
+
+### Teck Stack
+| Layer | Technology |
+|---|---|
+| Frontend | React + Next.js |
+| Backend | FastAPI + Pydantic |
+| Database | SQLAlchemy |
+| Server | Uvicorn |
+| Code Quality | Ruff + pre-commit |
 
 ## Setup Development Environment
 
