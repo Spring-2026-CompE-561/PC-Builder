@@ -6,6 +6,9 @@ from fastapi.middleware.cors import CORSMiddleware
 
 from app.routes.auth import router as auth_router
 from app.routes.builds import router as builds_router
+from app.routes.user import router as user_router
+from app.routes.category import router as category_router
+from app.routes.transaction import router as transaction_router
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -42,6 +45,9 @@ async def log_requests(request: Request, call_next):
 
 app.include_router(auth_router)
 app.include_router(builds_router)
+app.include_router(user_router)
+app.include_router(category_router)
+app.include_router(transaction_router)
 
 
 @app.get("/")
