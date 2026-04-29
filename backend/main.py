@@ -15,41 +15,45 @@ logger = logging.getLogger(__name__)
 
 app = FastAPI(title="PC Builder Backend")
 
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=[
-        "http://localhost:3000",
-        "http://127.0.0.1:3000",
-    ],
-    allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
-)
-
-
-@app.middleware("http")
-async def log_requests(request: Request, call_next):
-    start_time = time.time()
-    response = await call_next(request)
-    duration = time.time() - start_time
-
-    logger.info(
-        "%s %s - %s - %.4fs",
-        request.method,
-        request.url.path,
-        response.status_code,
-        duration,
+def configure_cors(app: FastAPI) -> None:
+    app.add_middleware(
+        CORSMiddleware,
+        allow_origins=[
+            "http://localhost:3000",
+            "http://127.0.0.1:3000",
+        ],
+        allow_credentials=True,
+        allow_methods=["*"],
+        allow_headers=["*"],
     )
+configure_cors(app)
+
+def configure_request_logging(app: FastAPI) -> None:
+    @app.middleware("http")
+    async def log_requests(request: Request, call_next):
+        start_time = time.time()
+        response = await call_next(request)
+        duration = time.time() - start_time
+
+        logger.info(
+            "%s %s - %s - %.4fs",
+            request.method,
+            request.url.path,
+            response.status_code,
+            duration,
+        )
+    configure_request_logging(app)
     return response
-
-
-app.include_router(auth_router)
-app.include_router(builds_router)
-app.include_router(user_router)
-app.include_router(category_router)
-app.include_router(transaction_router)
-
 
 @app.get("/")
 def root():
     return {"message": "PC Builder backend running"}
+
+def register_routes(app: FastAPI) -> None:
+    app.include_router(auth_router)
+    app.include_router(builds_router)
+    app.include_router(user_router)
+    app.include_router(category_router)
+    app.include_router(transaction_router)
+
+register_routes(app)
