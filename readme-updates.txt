@@ -3,3 +3,4 @@
 - npx create-next-app@latest frontend --typescript --tailwind --eslint --app --src-dir --import-alias "@/*"
 - ShadCN UI - Lyra Preset (JetBrains Mono + Phosphor Icons)
 - http://localhost:3000/
+- npm install lucide-react
