@@ -4,7 +4,7 @@ import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
+import { Sheet, SheetContent } from "@/components/ui/sheet";
 import { useAuth } from "@/context/AuthContext";
 import { Cpu, LogOut, Menu, User } from "lucide-react";
 import { cn } from "@/lib/utils";
@@ -71,15 +71,18 @@ export function Navbar() {
     }
     return (
       <>
-        <Button variant="ghost" size="sm" asChild>
-          <Link href="/sign-in" onClick={onClick}>
-            Sign In
-          </Link>
+        <Button
+          variant="ghost"
+          size="sm"
+          onClick={() => { router.push("/sign-in"); onClick?.(); }}
+        >
+          Sign In
         </Button>
-        <Button size="sm" asChild>
-          <Link href="/sign-up" onClick={onClick}>
-            Sign Up
-          </Link>
+        <Button
+          size="sm"
+          onClick={() => { router.push("/sign-up"); onClick?.(); }}
+        >
+          Sign Up
         </Button>
       </>
     );
@@ -109,14 +112,17 @@ export function Navbar() {
             <AuthButtons />
           </div>
 
-          {/* Mobile hamburger */}
+          {/* Mobile hamburger - plain button, no asChild needed */}
+          <button
+            className="md:hidden p-2 rounded-md hover:bg-accent transition-colors"
+            onClick={() => setMobileOpen(true)}
+            aria-label="Open menu"
+          >
+            <Menu className="w-5 h-5" />
+          </button>
+
+          {/* Mobile sheet controlled purely by state */}
           <Sheet open={mobileOpen} onOpenChange={setMobileOpen}>
-            <SheetTrigger asChild className="md:hidden">
-              <Button variant="ghost" size="icon">
-                <Menu className="w-5 h-5" />
-                <span className="sr-only">Open menu</span>
-              </Button>
-            </SheetTrigger>
             <SheetContent side="right" className="w-72">
               <div className="flex flex-col gap-6 mt-8">
                 <nav className="flex flex-col gap-1">
