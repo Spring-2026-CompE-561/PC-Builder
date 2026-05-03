@@ -1,4 +1,5 @@
 - node.js needs to be installed https://nodejs.org/en/download
 - to check if node.js is installed run node -v and npm -v in terminal, should output version
 - npx create-next-app@latest frontend --typescript --tailwind --eslint --app --src-dir --import-alias "@/*"
-- 
+- ShadCN UI - Lyra Preset (JetBrains Mono + Phosphor Icons)
+- http://localhost:3000/

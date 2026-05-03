@@ -21,6 +21,7 @@ PC Builder is a website that takes in a user's budget, preferences, and use case
 | Layer | Technology |
 |---|---|
 | Frontend | React + Next.js |
+| Design | ShadCN UI + Tailwind CSS | 
 | Backend | FastAPI + Pydantic |
 | Database | SQLAlchemy |
 | Server | Uvicorn |
