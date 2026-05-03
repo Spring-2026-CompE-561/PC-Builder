@@ -1,0 +1,3 @@
+- node.js needs to be installed https://nodejs.org/en/download
+- to check if node.js is installed run node -v and npm -v in terminal, should output version
+- 
