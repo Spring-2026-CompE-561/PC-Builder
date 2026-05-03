@@ -4,3 +4,7 @@
 - ShadCN UI - Lyra Preset (JetBrains Mono + Phosphor Icons)
 - http://localhost:3000/
 - npm install lucide-react
+
+
+.env.local in frontend/
+NEXT_PUBLIC_API_URL=http://localhost:8000
