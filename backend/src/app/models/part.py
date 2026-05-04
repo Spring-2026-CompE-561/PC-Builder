@@ -16,15 +16,15 @@ from app.core.database import Base
 import enum
 
 
-class PartType(enum.Enum):
-    CPU = "CPU"
-    GPU = "GPU"
-    RAM = "Ram"
-    STORAGE = "Storage"
-    MOTHERBOARD = "Motherboard"
-    POWER_SUPPLY = "PSU"
-    CASE = "CASE"
-    COOLER = "Cooler"
+class PartType(str, enum.Enum):
+    CPU = "cpu"
+    GPU = "gpu"
+    RAM = "ram"
+    STORAGE = "storage"
+    MOTHERBOARD = "motherboard"
+    POWER_SUPPLY = "psu"
+    CASE = "case"
+    COOLER = "cooler"
 
 
 class Part(Base):
@@ -64,3 +64,6 @@ class Pricing(Base):
     updated_at = Column(DateTime, default=datetime.utcnow)  # time of list last updated
 
     part = relationship("Part", back_populates="pricing")
+
+
+PartCategory = PartType
