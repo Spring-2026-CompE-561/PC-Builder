@@ -35,3 +35,21 @@ export const api = {
   put: <T>(path: string, body: unknown) => request<T>("PUT", path, body),
   delete: <T>(path: string) => request<T>("DELETE", path),
 };
+
+const API_URL = process.env.NEXT_PUBLIC_API_URL;
+
+export async function apiFetch<T>(path: string): Promise<T> {
+  if (!API_URL) {
+    throw new Error("NEXT_PUBLIC_API_URL is missing");
+  }
+
+  const res = await fetch(`${API_URL}${path}`, {
+    cache: "no-store",
+  });
+
+  if (!res.ok) {
+    throw new Error(`API request failed: ${res.status}`);
+  }
+
+  return res.json();
+}
