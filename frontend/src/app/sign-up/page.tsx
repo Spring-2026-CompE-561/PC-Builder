@@ -11,6 +11,10 @@ import { api } from "@/lib/api";
 import Link from "next/link";
 
 interface RegisterResponse {
+  id: number;
+}
+
+interface LoginResponse {
   access_token: string;
   token_type: string;
 }
@@ -19,6 +23,7 @@ export default function SignUpPage() {
   const { login } = useAuth();
   const router = useRouter();
 
+  const [name, setName] = useState("");
   const [username, setUsername] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -43,15 +48,22 @@ export default function SignUpPage() {
     setIsLoading(true);
 
     try {
-      const data = await api.post<RegisterResponse>("/auth/register", {
+      await api.post<RegisterResponse>("/auth/register", {
+        name,
         username,
+        email,
+        password,
+      });
+      const data = await api.post<LoginResponse>("/auth/login", {
         email,
         password,
       });
       await login(data.access_token);
       router.push("/");
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Registration failed. Please try again.");
+      setError(
+        err instanceof Error ? err.message : "Registration failed. Please try again."
+      );
     } finally {
       setIsLoading(false);
     }
@@ -72,6 +84,19 @@ export default function SignUpPage() {
                 {error}
               </div>
             )}
+
+            <div className="space-y-2">
+              <Label htmlFor="name">Name</Label>
+              <Input
+                id="name"
+                type="text"
+                placeholder="Housain Al Safar"
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+                required
+                autoComplete="name"
+              />
+            </div>
 
             <div className="space-y-2">
               <Label htmlFor="username">Username</Label>
@@ -132,7 +157,10 @@ export default function SignUpPage() {
             </Button>
             <p className="text-sm text-muted-foreground text-center">
               Already have an account?{" "}
-              <Link href="/sign-in" className="text-foreground underline underline-offset-4 hover:text-primary">
+              <Link
+                href="/sign-in"
+                className="text-foreground underline underline-offset-4 hover:text-primary"
+              >
                 Sign in
               </Link>
             </p>
