@@ -32,11 +32,11 @@ class BuildOut(BaseModel):
 
 # Info sent for manual selection part
 class BuildCreate(BaseModel):
-    name: str
+    name: Optional[str] = "My Build"
     use_case: Optional[UseCase] = None
     budget: Optional[float] = None
     notes: Optional[str] = None
-    parts_ids: list[int]
+    part_ids: list[int]
 
 
 # guided flow for build

@@ -1,6 +1,8 @@
 "use client";
 
 import { useState } from "react";
+// ShadeCN Button instead of html
+import { Button } from "@/components/ui/button";
 
 // the different archtype of computer to select
 const USE_CASES = [
@@ -30,19 +32,21 @@ export default function HomePage() {
         <p className="text-green-700 text-lg mb-10 max-w-lg mx-auto">
           Tell us your budget and what you need — we'll pick the best parts for you.
         </p>
+        {/* Two Buttons for beginner vs experienced */}
         <div className="flex flex-col sm:flex-row gap-3 justify-center">
-          <button
+          <Button
             onClick={() => { setExperienceLevel("beginner"); setStep("form"); }}
-            className="bg-green-500 text-black font-bold px-6 py-3 rounded hover:bg-green-400 transition-all"
+            className="bg-green-500 text-black font-bold px-6 py-3 hover:bg-green-400 matrix-btn"
           >
             I'm new to PC building
-          </button>
-          <button
+          </Button>
+          <Button
+            variant="outline"
             onClick={() => { setExperienceLevel("experienced"); setStep("form"); }}
-            className="border border-green-700 text-green-400 font-semibold px-6 py-3 rounded hover:bg-green-950 transition-all"
+            className="border-green-700 text-green-400 px-6 py-3 hover:bg-green-950"
           >
             I know what I'm doing
-          </button>
+          </Button>
         </div>
       </div>
 
@@ -83,13 +87,14 @@ export default function HomePage() {
         </h2>
         <div className="flex flex-wrap justify-center gap-3">
           {USE_CASES.map((uc) => (
-            <button
+            <Button
               key={uc.value}
+              variant="outline"
               onClick={() => { setUseCase(uc.value); setExperienceLevel("beginner"); setStep("form"); }}
-              className="px-4 py-2 rounded border border-green-900 bg-black text-sm text-green-600 font-medium hover:border-green-500 hover:text-green-400 transition-all"
+              className="border-green-900 bg-black text-green-600 hover:border-green-500 hover:text-green-400"
             >
               {uc.label}
-            </button>
+            </Button>
           ))}
         </div>
       </div>
