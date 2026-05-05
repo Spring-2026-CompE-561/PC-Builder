@@ -168,8 +168,15 @@ def list_builds(
 
 
 @router.get("/{build_id}", response_model=BuildOut)
-def get_build(build_id: int, db: Session = Depends(get_db)):
-    return _build_out(_load_build(build_id, db))
+def get_build(
+    build_id: int,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+):
+    build = _load_build(build_id, db)
+    if build.user_id != current_user.id:
+        raise HTTPException(status_code=403, detail="Not authorized to view this build")
+    return _build_out(build)
 
 
 @router.post("/", response_model=BuildOut)

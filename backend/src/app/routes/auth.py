@@ -75,8 +75,8 @@ def register(user: UserCreate, db: Session = Depends(get_db)):
         name=user.name,
         email=user.email,
         password=hash_password(user.password),
+        username=user.username,
     )
-
     db.add(new_user)
     db.commit()
     db.refresh(new_user)
