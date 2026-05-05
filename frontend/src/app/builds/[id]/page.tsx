@@ -97,6 +97,30 @@ export default async function BuildDetailsPage({
         </div>
 
         </div>
+                <div className="mb-8 rounded-lg border border-green-900 bg-black p-6">
+          <h2 className="mb-3 text-2xl font-semibold text-green-300">
+            Build Actions
+          </h2>
+          <p className="mb-4 text-sm text-green-700">
+            Save and export options will connect to the backend later.
+          </p>
+
+          <div className="flex flex-col gap-3 sm:flex-row">
+            <button
+              type="button"
+              className="rounded border border-green-700 px-4 py-2 text-sm font-semibold text-green-400 transition-all hover:bg-green-950"
+            >
+              Save Build
+            </button>
+
+            <button
+              type="button"
+              className="rounded border border-green-700 px-4 py-2 text-sm font-semibold text-green-400 transition-all hover:bg-green-950"
+            >
+              Export Build
+            </button>
+          </div>
+        </div>
 
         <Link
           href="/builds/list"
