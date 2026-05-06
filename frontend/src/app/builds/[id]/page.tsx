@@ -36,8 +36,6 @@ export default function BuildDetailsPage() {
   const params = useParams<{ id: string }>();
   const id = params.id;
   const router = useRouter();
-
-
   const [build, setBuild] = useState<Build | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState("");
@@ -83,6 +81,24 @@ export default function BuildDetailsPage() {
       setError(message);
       setIsDeleting(false);
     }
+  }
+
+  function handleExportBuild() {
+    if (!build) return;
+
+    const fileName =
+      build.name.trim().toLowerCase().replace(/\s+/g, "-") || `build-${build.id}`;
+
+    const blob = new Blob([JSON.stringify(build, null, 2)], {
+      type: "application/json",
+    });
+
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = `${fileName}.json`;
+    link.click();
+    URL.revokeObjectURL(url);
   }
 
 
@@ -220,12 +236,12 @@ export default function BuildDetailsPage() {
 
                 <button
                   type="button"
+                  onClick={handleExportBuild}
                   className="rounded border border-green-700 px-4 py-2 text-sm font-semibold text-green-400 transition-all hover:bg-green-950"
                 >
                   Export Build
                 </button>
               </div>
-
             </div>
 
             <Link
