@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useParams } from "next/navigation";
+import { useParams, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { api } from "@/lib/api";
 
@@ -35,10 +35,14 @@ function formatLabel(value: string | null) {
 export default function BuildDetailsPage() {
   const params = useParams<{ id: string }>();
   const id = params.id;
+  const router = useRouter();
+
 
   const [build, setBuild] = useState<Build | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState("");
+  const [isDeleting, setIsDeleting] = useState(false);
+
 
   useEffect(() => {
     async function loadBuild() {
@@ -58,6 +62,29 @@ export default function BuildDetailsPage() {
       loadBuild();
     }
   }, [id]);
+
+  async function handleDeleteBuild() {
+    if (!id || isDeleting) return;
+
+    const confirmed = window.confirm(
+      "Delete this build? This action cannot be undone."
+    );
+
+    if (!confirmed) return;
+
+    try {
+      setIsDeleting(true);
+      setError("");
+      await api.delete(`/builds/${id}`);
+      router.push("/builds/list");
+    } catch (err) {
+      const message =
+        err instanceof Error ? err.message : "Could not delete build.";
+      setError(message);
+      setIsDeleting(false);
+    }
+  }
+
 
   return (
     <div className="min-h-screen bg-black px-4 py-20 text-green-400">
@@ -184,9 +211,11 @@ export default function BuildDetailsPage() {
               <div className="flex flex-col gap-3 sm:flex-row">
                 <button
                   type="button"
-                  className="rounded border border-green-700 px-4 py-2 text-sm font-semibold text-green-400 transition-all hover:bg-green-950"
+                  onClick={handleDeleteBuild}
+                  disabled={isDeleting}
+                  className="rounded border border-red-700 px-4 py-2 text-sm font-semibold text-red-300 transition-all hover:bg-red-950/40 disabled:cursor-not-allowed disabled:opacity-60"
                 >
-                  Save Build
+                  {isDeleting ? "Deleting..." : "Delete Build"}
                 </button>
 
                 <button
@@ -196,6 +225,7 @@ export default function BuildDetailsPage() {
                   Export Build
                 </button>
               </div>
+
             </div>
 
             <Link
