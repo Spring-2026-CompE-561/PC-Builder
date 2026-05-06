@@ -11,6 +11,9 @@ export interface FilterOptions {
   maxPrice?: number;
   minPrice?: number;
   inStockOnly?: boolean;
+  sort?: "price_asc" | "price_desc";
+  specKey?: string;
+  specValue?: string;
 }
 
 interface PartsFilterProps {
@@ -18,12 +21,28 @@ interface PartsFilterProps {
   brands?: string[];
 }
 
+const specOptions = [
+  "socket",
+  "supported_ram",
+  "type",
+  "form_factor",
+  "interface",
+  "capacity_gb",
+  "vram_type",
+  "color",
+  "wattage",
+  "tdp",
+];
+
 export function PartsFilter({ onFilterChange, brands = [] }: PartsFilterProps) {
   // State for each filter input
   const [minPrice, setMinPrice] = useState<number | undefined>();
   const [maxPrice, setMaxPrice] = useState<number | undefined>();
   const [selectedBrand, setSelectedBrand] = useState<string>("");
   const [inStockOnly, setInStockOnly] = useState(false);
+  const [sort, setSort] = useState<FilterOptions["sort"]>(undefined);
+  const [specKey, setSpecKey] = useState<string>("");
+  const [specValue, setSpecValue] = useState<string>("");
 
   // Apply filters by calling the parent callback
   const handleApplyFilters = () => {
@@ -32,6 +51,9 @@ export function PartsFilter({ onFilterChange, brands = [] }: PartsFilterProps) {
       maxPrice,
       brand: selectedBrand || undefined,
       inStockOnly,
+      sort,
+      specKey: specKey || undefined,
+      specValue: specValue || undefined,
     });
   };
 
@@ -41,6 +63,9 @@ export function PartsFilter({ onFilterChange, brands = [] }: PartsFilterProps) {
     setMaxPrice(undefined);
     setSelectedBrand("");
     setInStockOnly(false);
+    setSort(undefined);
+    setSpecKey("");
+    setSpecValue("");
     onFilterChange({});
   };
 
@@ -85,6 +110,47 @@ export function PartsFilter({ onFilterChange, brands = [] }: PartsFilterProps) {
           </select>
         </div>
       )}
+
+      {/* Sort */}
+      <div className="mb-6 space-y-2">
+        <Label>Sort by</Label>
+        <select
+          value={sort ?? ""}
+          onChange={(e) =>
+            setSort(e.target.value ? (e.target.value as FilterOptions["sort"]) : undefined)
+          }
+          className="w-full rounded border px-3 py-2"
+        >
+          <option value="">Default</option>
+          <option value="price_asc">Price: Low to High</option>
+          <option value="price_desc">Price: High to Low</option>
+        </select>
+      </div>
+
+      {/* Spec filter */}
+      <div className="mb-6 space-y-2">
+        <Label>Spec Filter</Label>
+        <div className="flex gap-2">
+          <select
+            value={specKey}
+            onChange={(e) => setSpecKey(e.target.value)}
+            className="w-1/2 rounded border px-3 py-2"
+          >
+            <option value="">Spec key</option>
+            {specOptions.map((spec) => (
+              <option key={spec} value={spec}>
+                {spec.replace(/_/g, " ")}
+              </option>
+            ))}
+          </select>
+          <Input
+            type="text"
+            placeholder="Spec value"
+            value={specValue}
+            onChange={(e) => setSpecValue(e.target.value)}
+          />
+        </div>
+      </div>
 
       {/* In Stock Only */}
       <div className="mb-6 flex items-center gap-2">

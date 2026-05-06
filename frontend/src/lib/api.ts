@@ -43,9 +43,16 @@ export async function apiFetch<T>(path: string): Promise<T> {
     throw new Error("NEXT_PUBLIC_API_URL is missing");
   }
 
-  const res = await fetch(`${API_URL}${path}`, {
-    cache: "no-store",
-  });
+  let res: Response;
+  try {
+    res = await fetch(`${API_URL}${path}`, {
+      cache: "no-store",
+    });
+  } catch {
+    throw new Error(
+      `Could not connect to the backend at ${API_URL}. Make sure the FastAPI server is running.`
+    );
+  }
 
   if (!res.ok) {
     throw new Error(`API request failed: ${res.status}`);

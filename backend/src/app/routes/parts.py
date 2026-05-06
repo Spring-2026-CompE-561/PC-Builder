@@ -11,6 +11,9 @@ router = APIRouter(prefix="/parts", tags=["parts"])
 
 
 def _enrich(part: Part) -> dict:
+    compatibility = (
+        "Available" if part.pricing and part.pricing.in_stock else "Out of Stock"
+    )
     return {
         "id": part.id,
         "name": part.name,
@@ -20,18 +23,32 @@ def _enrich(part: Part) -> dict:
         "image_url": part.image_url,
         "price": part.pricing.price if part.pricing else None,
         "in_stock": part.pricing.in_stock if part.pricing else None,
+        "compatibility": compatibility,
     }
 
 
 # list part
-def _filter_parts(parts: list[Part], max_price: Optional[float], in_stock_only: bool) -> list[dict]:
+def _filter_parts(
+    parts: list[Part],
+    min_price: Optional[float],
+    max_price: Optional[float],
+    in_stock_only: bool,
+    spec_key: Optional[str] = None,
+    spec_value: Optional[str] = None,
+) -> list[dict]:
     results = []
     for p in parts:
         e = _enrich(p)
-        if max_price and e["price"] and e["price"] > max_price:
+        if min_price is not None and e["price"] is not None and e["price"] < min_price:
+            continue
+        if max_price is not None and e["price"] is not None and e["price"] > max_price:
             continue
         if in_stock_only and not e.get("in_stock"):
             continue
+        if spec_key and spec_value:
+            spec_field = e.get("specs", {}).get(spec_key)
+            if spec_field is None or spec_value.lower() not in str(spec_field).lower():
+                continue
         results.append(e)
     return results
 
@@ -39,39 +56,63 @@ def _filter_parts(parts: list[Part], max_price: Optional[float], in_stock_only: 
 @router.get("/", response_model=list[PartOut])
 def list_parts(
     category: Optional[PartCategory] = None,
+    min_price: Optional[float] = None,
     max_price: Optional[float] = None,
     brand: Optional[str] = None,
     in_stock_only: bool = False,
-    db: Session = Depends(get_db),
-):
-    q = db.query(Part).options(joinedload(Part.pricing)).filter(Part.is_active)
-    if category:
-        q = q.filter(Part.category == category)
-    if brand:
-        q = q.filter(Part.brand.ilike(f"%{brand}%"))
-
-    parts = q.all()
-    return _filter_parts(parts, max_price, in_stock_only)
-
-
-@router.get("/category/{category}", response_model=list[PartOut])
-def list_parts_by_category(
-    category: PartCategory,
-    max_price: Optional[float] = None,
-    brand: Optional[str] = None,
-    in_stock_only: bool = False,
+    spec_key: Optional[str] = None,
+    spec_value: Optional[str] = None,
+    sort: Optional[str] = None,
     db: Session = Depends(get_db),
 ):
     q = (
         db.query(Part)
         .options(joinedload(Part.pricing))
+        .outerjoin(Pricing)
+        .filter(Part.is_active)
+    )
+    if category:
+        q = q.filter(Part.category == category)
+    if brand:
+        q = q.filter(Part.brand.ilike(f"%{brand}%"))
+
+    if sort == "price_asc":
+        q = q.order_by(Pricing.price.asc())
+    elif sort == "price_desc":
+        q = q.order_by(Pricing.price.desc())
+
+    parts = q.all()
+    return _filter_parts(parts, min_price, max_price, in_stock_only, spec_key, spec_value)
+
+
+@router.get("/category/{category}", response_model=list[PartOut])
+def list_parts_by_category(
+    category: PartCategory,
+    min_price: Optional[float] = None,
+    max_price: Optional[float] = None,
+    brand: Optional[str] = None,
+    in_stock_only: bool = False,
+    spec_key: Optional[str] = None,
+    spec_value: Optional[str] = None,
+    sort: Optional[str] = None,
+    db: Session = Depends(get_db),
+):
+    q = (
+        db.query(Part)
+        .options(joinedload(Part.pricing))
+        .outerjoin(Pricing)
         .filter(Part.is_active, Part.category == category)
     )
     if brand:
         q = q.filter(Part.brand.ilike(f"%{brand}%"))
 
+    if sort == "price_asc":
+        q = q.order_by(Pricing.price.asc())
+    elif sort == "price_desc":
+        q = q.order_by(Pricing.price.desc())
+
     parts = q.all()
-    return _filter_parts(parts, max_price, in_stock_only)
+    return _filter_parts(parts, min_price, max_price, in_stock_only, spec_key, spec_value)
 
 
 # part router
