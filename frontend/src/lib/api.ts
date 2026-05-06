@@ -33,7 +33,6 @@ async function request<T>(
   return res.json();
 }
 
-
 export const api = {
   get: <T>(path: string) => request<T>("GET", path),
   post: <T>(path: string, body: unknown) => request<T>("POST", path, body),
@@ -44,9 +43,16 @@ export const api = {
 const API_URL = process.env.NEXT_PUBLIC_API_URL || BASE_URL;
 
 export async function apiFetch<T>(path: string): Promise<T> {
-  const res = await fetch(`${API_URL}${path}`, {
-    cache: "no-store",
-  });
+  let res: Response;
+  try {
+    res = await fetch(`${API_URL}${path}`, {
+      cache: "no-store",
+    });
+  } catch {
+    throw new Error(
+      `Could not connect to the backend at ${API_URL}. Make sure the FastAPI server is running.`
+    );
+  }
 
   if (!res.ok) {
     throw new Error(`API request failed: ${res.status}`);

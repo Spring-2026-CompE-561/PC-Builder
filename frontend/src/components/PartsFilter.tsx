@@ -11,6 +11,8 @@ export interface FilterOptions {
   maxPrice?: number;
   minPrice?: number;
   inStockOnly?: boolean;
+  sort?: "price_asc" | "price_desc";
+  specKeys?: string[];
 }
 
 interface PartsFilterProps {
@@ -18,12 +20,35 @@ interface PartsFilterProps {
   brands?: string[];
 }
 
+const specOptions = [
+  "socket",
+  "supported_ram",
+  "type",
+  "form_factor",
+  "interface",
+  "capacity_gb",
+  "vram_type",
+  "color",
+  "wattage",
+  "tdp",
+];
+
 export function PartsFilter({ onFilterChange, brands = [] }: PartsFilterProps) {
   // State for each filter input
   const [minPrice, setMinPrice] = useState<number | undefined>();
   const [maxPrice, setMaxPrice] = useState<number | undefined>();
   const [selectedBrand, setSelectedBrand] = useState<string>("");
   const [inStockOnly, setInStockOnly] = useState(false);
+  const [sort, setSort] = useState<FilterOptions["sort"]>(undefined);
+  const [selectedSpecs, setSelectedSpecs] = useState<string[]>([]);
+
+  const toggleSpec = (spec: string) => {
+    setSelectedSpecs((current) =>
+      current.includes(spec)
+        ? current.filter((item) => item !== spec)
+        : [...current, spec]
+    );
+  };
 
   // Apply filters by calling the parent callback
   const handleApplyFilters = () => {
@@ -32,6 +57,8 @@ export function PartsFilter({ onFilterChange, brands = [] }: PartsFilterProps) {
       maxPrice,
       brand: selectedBrand || undefined,
       inStockOnly,
+      sort,
+      specKeys: selectedSpecs.length > 0 ? selectedSpecs : undefined,
     });
   };
 
@@ -41,11 +68,13 @@ export function PartsFilter({ onFilterChange, brands = [] }: PartsFilterProps) {
     setMaxPrice(undefined);
     setSelectedBrand("");
     setInStockOnly(false);
+    setSort(undefined);
+    setSelectedSpecs([]);
     onFilterChange({});
   };
 
   return (
-    <div className="rounded-lg border bg-white p-6 shadow-sm">
+    <div className="rounded-lg border border-border bg-card p-6 text-card-foreground shadow-sm">
       <h3 className="text-lg font-semibold mb-4">Filters</h3>
 
       {/* Price Range */}
@@ -74,7 +103,7 @@ export function PartsFilter({ onFilterChange, brands = [] }: PartsFilterProps) {
           <select
             value={selectedBrand}
             onChange={(e) => setSelectedBrand(e.target.value)}
-            className="w-full rounded border px-3 py-2"
+            className="w-full rounded border border-input bg-background px-3 py-2 text-foreground"
           >
             <option value="">All Brands</option>
             {brands.map((b) => (
@@ -85,6 +114,42 @@ export function PartsFilter({ onFilterChange, brands = [] }: PartsFilterProps) {
           </select>
         </div>
       )}
+
+      {/* Sort */}
+      <div className="mb-6 space-y-2">
+        <Label>Sort by</Label>
+        <select
+          value={sort ?? ""}
+          onChange={(e) =>
+            setSort(e.target.value ? (e.target.value as FilterOptions["sort"]) : undefined)
+          }
+          className="w-full rounded border border-input bg-background px-3 py-2 text-foreground"
+        >
+          <option value="">Default</option>
+          <option value="price_asc">Price: Low to High</option>
+          <option value="price_desc">Price: High to Low</option>
+        </select>
+      </div>
+
+      {/* Spec filter */}
+      <div className="mb-6 space-y-3">
+        <Label>Specs Listed</Label>
+        <div className="grid gap-2">
+          {specOptions.map((spec) => (
+            <div key={spec} className="flex items-center gap-2">
+              <input
+                type="checkbox"
+                id={`spec-${spec}`}
+                checked={selectedSpecs.includes(spec)}
+                onChange={() => toggleSpec(spec)}
+              />
+              <Label htmlFor={`spec-${spec}`} className="m-0 capitalize">
+                {spec.replace(/_/g, " ")}
+              </Label>
+            </div>
+          ))}
+        </div>
+      </div>
 
       {/* In Stock Only */}
       <div className="mb-6 flex items-center gap-2">
