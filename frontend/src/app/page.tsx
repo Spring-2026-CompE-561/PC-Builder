@@ -1,15 +1,12 @@
 "use client";
 
 import { useState } from "react";
-import { useRouter } from "next/navigation";
-import { api } from "@/lib/api";
-import { useAuth } from "@/context/AuthContext";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
+import { api } from "@/lib/api";
 
-// the different archetypes of computer to select
 const USE_CASES = [
   { value: "gaming", label: "Gaming", description: "High FPS, streaming" },
   { value: "workstation", label: "Workstation", description: "3D, rendering, multitasking" },
@@ -20,65 +17,79 @@ const USE_CASES = [
 const BRAND_OPTIONS = ["No preference", "AMD", "Intel", "NVIDIA", "Budget-friendly"];
 const AESTHETIC_OPTIONS = ["No preference", "Minimal / Sleek", "RGB / Flashy", "Black & White"];
 
-type GeneratedBuild = {
-  id: number;
+type BuildPart = {
+  part_id: number;
+  part_name: string;
+  category: string | null;
+  quantity: number;
+  unit_price: number | null;
+  subtotal: number | null;
 };
 
+type Build = {
+  id: number;
+  name: string;
+  use_case: string | null;
+  budget: number | null;
+  total_cost: number;
+  parts: BuildPart[];
+};
 
 export default function HomePage() {
   // controls which screen to show
   const [step, setStep] = useState("landing");
   const [experienceLevel, setExperienceLevel] = useState("beginner");
   const [useCase, setUseCase] = useState("gaming");
-  const router = useRouter();
-  const { user, isLoading: isAuthLoading } = useAuth();
-
 
   // form values
   const [budget, setBudget] = useState("1000");
   const [brandPref, setBrandPref] = useState("No preference");
   const [aesthetic, setAesthetic] = useState("No preference");
-  const [isGenerating, setIsGenerating] = useState(false);
+
+  // generate state
+  const [build, setBuild] = useState<Build | null>(null);
+  const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
 
-  async function handleGenerateBuild() {
-    const numericBudget = Number(budget);
-
-    if (!Number.isFinite(numericBudget) || numericBudget < 300) {
-      setError("Please enter a valid budget of at least $300.");
-      return;
-    }
-
-    if (!user) {
-      router.push("/sign-in");
-      return;
-    }
-
+  async function handleGenerate() {
+    setIsLoading(true);
+    setError("");
+    const brands = brandPref === "No preference" || brandPref === "Budget-friendly"
+      ? []
+      : [brandPref];
     try {
-      setIsGenerating(true);
-      setError("");
-
-      const preferredBrands =
-        brandPref !== "No preference" && brandPref !== "Budget-friendly"
-          ? [brandPref]
-          : undefined;
-
-      const data = await api.post<GeneratedBuild>("/builds/generate", {
-        budget: numericBudget,
+      const result = await api.post<Build>("/builds/generate", {
+        budget: parseFloat(budget),
         use_case: useCase,
-        preferred_brands: preferredBrands,
+        preferred_brands: brands,
       });
-
-      router.push(`/builds/${data.id}`);
+      setBuild(result);
+      setStep("results");
     } catch (err) {
-      const message =
-        err instanceof Error ? err.message : "Could not generate build.";
-      setError(message);
-      setIsGenerating(false);
+      setError(err instanceof Error ? err.message : "Something went wrong.");
+    } finally {
+      setIsLoading(false);
     }
   }
 
-
+  function exportBuild() {
+    if (!build) return;
+    const lines = [
+      `Build: ${build.name}`,
+      `Total: $${build.total_cost.toFixed(2)}`,
+      "",
+      ...build.parts.map(
+        (p) => `${p.category?.toUpperCase() ?? "PART"} — ${p.part_name} — $${p.unit_price?.toFixed(2) ?? "N/A"}`
+      ),
+    ];
+    const blob = new Blob([lines.join("\n")], { type: "text/plain" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = "my-build.txt";
+    a.click();
+    URL.revokeObjectURL(url);
+  }
 
   // Home Page
   if (step === "landing") {
@@ -170,10 +181,10 @@ export default function HomePage() {
             </h2>
             <div className="grid grid-cols-5 gap-8 px-4">
               {[
-                { img: "/build1.jpg", user: "KyleTOS" },
+                { img: "/build1.jpg", user: "KevdDoe" },
                 { img: "/build2.jpg", user: "Krill" },
                 { img: "/build3.jpg", user: "DonnyDigital" },
-                { img: "/build4.jpg", user: "Slime" },
+                { img: "/build4.jpg", user: "KyleTOS" },
                 { img: "/build5.jpg", user: "Rockman" },
               ].map((build) => (
                 <div key={build.user} className="border border-border bg-card">
@@ -284,23 +295,88 @@ export default function HomePage() {
                   </div>
                 </>
               )}
-              
+
+              {/* error message */}
               {error && (
-                <p className="rounded border border-red-900 bg-red-950/20 px-3 py-2 text-sm text-red-300">
-                  {error}
-                </p>
+                <p className="text-sm text-red-400 border border-red-900 bg-red-950/20 px-3 py-2">{error}</p>
               )}
 
               {/* Generate button */}
               <Button
-                type="button"
-                onClick={handleGenerateBuild}
-                disabled={isGenerating || isAuthLoading}
-                className="w-full bg-primary text-primary-foreground font-bold hover:bg-primary/90 matrix-btn disabled:opacity-60"
+                onClick={handleGenerate}
+                disabled={isLoading}
+                className="w-full bg-primary text-primary-foreground font-bold hover:bg-primary/90 matrix-btn disabled:opacity-50"
               >
-                {isGenerating ? "> Generating..." : "> Generate My Build"}
+                {isLoading ? "> generating..." : "> Generate My Build"}
               </Button>
 
+            </CardContent>
+          </Card>
+        </div>
+      </div>
+    );
+  }
+
+  // Results
+  if (step === "results" && build) {
+    return (
+      <div className="bg-background min-h-screen">
+        <div className="max-w-2xl mx-auto px-4 py-10">
+
+          {/* Back button */}
+          <Button
+            variant="ghost"
+            onClick={() => setStep("form")}
+            className="text-muted-foreground hover:text-primary mb-6 px-0"
+          >
+            ← back
+          </Button>
+
+          {/* Results card */}
+          <Card className="bg-background border-border">
+            <CardHeader>
+              <span className="text-xs bg-accent text-primary border border-border px-2 py-1 w-fit">
+                // your build
+              </span>
+              <CardTitle className="text-foreground text-2xl">{build.name}</CardTitle>
+              <CardDescription className="text-primary text-lg font-bold">
+                Total: ${build.total_cost.toFixed(2)}
+              </CardDescription>
+            </CardHeader>
+
+            <CardContent className="space-y-3">
+
+              {/* Parts list */}
+              {build.parts.map((part) => (
+                <div key={part.part_id} className="flex justify-between items-center border border-border px-4 py-3 bg-card">
+                  <div>
+                    <p className="text-xs text-muted-foreground uppercase tracking-widest mb-0.5">
+                      {part.category ?? "part"}
+                    </p>
+                    <p className="text-foreground text-sm font-medium">{part.part_name}</p>
+                  </div>
+                  <p className="text-primary text-sm font-bold">
+                    ${part.unit_price?.toFixed(2) ?? "N/A"}
+                  </p>
+                </div>
+              ))}
+
+              {/* Actions */}
+              <div className="flex gap-3 pt-2">
+                <Button
+                  onClick={exportBuild}
+                  variant="outline"
+                  className="flex-1 border-border text-primary hover:bg-accent"
+                >
+                  Export .txt
+                </Button>
+                <Button
+                  onClick={() => { setBuild(null); setStep("landing"); }}
+                  className="flex-1 bg-primary text-primary-foreground hover:bg-primary/90"
+                >
+                  Start Over
+                </Button>
+              </div>
 
             </CardContent>
           </Card>
