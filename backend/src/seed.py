@@ -6,6 +6,7 @@ sys.path.insert(0, os.path.dirname(__file__))
 from app.core.database import engine, SessionLocal, Base
 from app.models.part import Part, Pricing, PartType
 
+
 # Create all tables
 Base.metadata.create_all(bind=engine)
 
