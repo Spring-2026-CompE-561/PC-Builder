@@ -81,14 +81,14 @@ export default function PartsPage() {
           <PartsFilter onFilterChange={applyFilters} brands={brands} />
 
           {/* Category Shortcuts */}
-          <div className="mt-6 rounded-lg border bg-white p-4 shadow-sm">
+          <div className="mt-6 rounded-lg border border-border bg-card p-4 text-card-foreground shadow-sm">
             <h3 className="font-semibold mb-3">Browse by Category</h3>
             <div className="space-y-2">
               {["cpu", "gpu", "ram", "storage", "motherboard", "psu", "case", "cooler"].map((cat) => (
                 <Link
                   key={cat}
                   href={`/parts/category/${cat}`}
-                  className="block rounded px-2 py-1 text-sm capitalize hover:bg-gray-100"
+                  className="block rounded px-2 py-1 text-sm capitalize hover:bg-accent hover:text-accent-foreground"
                 >
                   {cat}
                 </Link>

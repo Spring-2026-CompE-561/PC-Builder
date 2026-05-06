@@ -74,7 +74,7 @@ export function PartsFilter({ onFilterChange, brands = [] }: PartsFilterProps) {
   };
 
   return (
-    <div className="rounded-lg border bg-white p-6 shadow-sm">
+    <div className="rounded-lg border border-border bg-card p-6 text-card-foreground shadow-sm">
       <h3 className="text-lg font-semibold mb-4">Filters</h3>
 
       {/* Price Range */}
@@ -103,7 +103,7 @@ export function PartsFilter({ onFilterChange, brands = [] }: PartsFilterProps) {
           <select
             value={selectedBrand}
             onChange={(e) => setSelectedBrand(e.target.value)}
-            className="w-full rounded border px-3 py-2"
+            className="w-full rounded border border-input bg-background px-3 py-2 text-foreground"
           >
             <option value="">All Brands</option>
             {brands.map((b) => (
@@ -123,7 +123,7 @@ export function PartsFilter({ onFilterChange, brands = [] }: PartsFilterProps) {
           onChange={(e) =>
             setSort(e.target.value ? (e.target.value as FilterOptions["sort"]) : undefined)
           }
-          className="w-full rounded border px-3 py-2"
+          className="w-full rounded border border-input bg-background px-3 py-2 text-foreground"
         >
           <option value="">Default</option>
           <option value="price_asc">Price: Low to High</option>
