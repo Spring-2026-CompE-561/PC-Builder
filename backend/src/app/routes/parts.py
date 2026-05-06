@@ -33,6 +33,7 @@ def _filter_parts(
     min_price: Optional[float],
     max_price: Optional[float],
     in_stock_only: bool,
+    spec_keys: Optional[list[str]] = None,
     spec_key: Optional[str] = None,
     spec_value: Optional[str] = None,
 ) -> list[dict]:
@@ -45,12 +46,23 @@ def _filter_parts(
             continue
         if in_stock_only and not e.get("in_stock"):
             continue
+        specs = e.get("specs") or {}
+        if spec_keys and any(key not in specs for key in spec_keys):
+            continue
         if spec_key and spec_value:
-            spec_field = e.get("specs", {}).get(spec_key)
+            spec_field = specs.get(spec_key)
             if spec_field is None or spec_value.lower() not in str(spec_field).lower():
                 continue
+        if spec_key and not spec_value and spec_key not in specs:
+            continue
         results.append(e)
     return results
+
+
+def _parse_spec_keys(spec_keys: Optional[str]) -> list[str]:
+    if not spec_keys:
+        return []
+    return [key.strip() for key in spec_keys.split(",") if key.strip()]
 
 
 @router.get("/", response_model=list[PartOut])
@@ -60,6 +72,7 @@ def list_parts(
     max_price: Optional[float] = None,
     brand: Optional[str] = None,
     in_stock_only: bool = False,
+    spec_keys: Optional[str] = None,
     spec_key: Optional[str] = None,
     spec_value: Optional[str] = None,
     sort: Optional[str] = None,
@@ -82,7 +95,15 @@ def list_parts(
         q = q.order_by(Pricing.price.desc())
 
     parts = q.all()
-    return _filter_parts(parts, min_price, max_price, in_stock_only, spec_key, spec_value)
+    return _filter_parts(
+        parts,
+        min_price,
+        max_price,
+        in_stock_only,
+        _parse_spec_keys(spec_keys),
+        spec_key,
+        spec_value,
+    )
 
 
 @router.get("/category/{category}", response_model=list[PartOut])
@@ -92,6 +113,7 @@ def list_parts_by_category(
     max_price: Optional[float] = None,
     brand: Optional[str] = None,
     in_stock_only: bool = False,
+    spec_keys: Optional[str] = None,
     spec_key: Optional[str] = None,
     spec_value: Optional[str] = None,
     sort: Optional[str] = None,
@@ -112,7 +134,15 @@ def list_parts_by_category(
         q = q.order_by(Pricing.price.desc())
 
     parts = q.all()
-    return _filter_parts(parts, min_price, max_price, in_stock_only, spec_key, spec_value)
+    return _filter_parts(
+        parts,
+        min_price,
+        max_price,
+        in_stock_only,
+        _parse_spec_keys(spec_keys),
+        spec_key,
+        spec_value,
+    )
 
 
 # part router

@@ -47,8 +47,7 @@ export default function CategoryPage() {
       brand: newFilters.brand,
       inStockOnly: newFilters.inStockOnly,
       sort: newFilters.sort,
-      specKey: newFilters.specKey,
-      specValue: newFilters.specValue,
+      specKeys: newFilters.specKeys,
     });
   }
 

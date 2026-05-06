@@ -19,8 +19,7 @@ export type PartQuery = {
   brand?: string;
   inStockOnly?: boolean;
   sort?: "price_asc" | "price_desc";
-  specKey?: string;
-  specValue?: string;
+  specKeys?: string[];
 };
 
 function buildQuery(params: PartQuery = {}) {
@@ -32,8 +31,7 @@ function buildQuery(params: PartQuery = {}) {
   if (params.brand) query.set("brand", params.brand);
   if (params.inStockOnly) query.set("in_stock_only", "true");
   if (params.sort) query.set("sort", params.sort);
-  if (params.specKey) query.set("spec_key", params.specKey);
-  if (params.specValue) query.set("spec_value", params.specValue);
+  if (params.specKeys?.length) query.set("spec_keys", params.specKeys.join(","));
 
   return query.toString() ? `?${query.toString()}` : "";
 }

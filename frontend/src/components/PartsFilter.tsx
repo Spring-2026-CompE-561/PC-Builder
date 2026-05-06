@@ -12,8 +12,7 @@ export interface FilterOptions {
   minPrice?: number;
   inStockOnly?: boolean;
   sort?: "price_asc" | "price_desc";
-  specKey?: string;
-  specValue?: string;
+  specKeys?: string[];
 }
 
 interface PartsFilterProps {
@@ -41,8 +40,15 @@ export function PartsFilter({ onFilterChange, brands = [] }: PartsFilterProps) {
   const [selectedBrand, setSelectedBrand] = useState<string>("");
   const [inStockOnly, setInStockOnly] = useState(false);
   const [sort, setSort] = useState<FilterOptions["sort"]>(undefined);
-  const [specKey, setSpecKey] = useState<string>("");
-  const [specValue, setSpecValue] = useState<string>("");
+  const [selectedSpecs, setSelectedSpecs] = useState<string[]>([]);
+
+  const toggleSpec = (spec: string) => {
+    setSelectedSpecs((current) =>
+      current.includes(spec)
+        ? current.filter((item) => item !== spec)
+        : [...current, spec]
+    );
+  };
 
   // Apply filters by calling the parent callback
   const handleApplyFilters = () => {
@@ -52,8 +58,7 @@ export function PartsFilter({ onFilterChange, brands = [] }: PartsFilterProps) {
       brand: selectedBrand || undefined,
       inStockOnly,
       sort,
-      specKey: specKey || undefined,
-      specValue: specValue || undefined,
+      specKeys: selectedSpecs.length > 0 ? selectedSpecs : undefined,
     });
   };
 
@@ -64,8 +69,7 @@ export function PartsFilter({ onFilterChange, brands = [] }: PartsFilterProps) {
     setSelectedBrand("");
     setInStockOnly(false);
     setSort(undefined);
-    setSpecKey("");
-    setSpecValue("");
+    setSelectedSpecs([]);
     onFilterChange({});
   };
 
@@ -128,27 +132,22 @@ export function PartsFilter({ onFilterChange, brands = [] }: PartsFilterProps) {
       </div>
 
       {/* Spec filter */}
-      <div className="mb-6 space-y-2">
-        <Label>Spec Filter</Label>
-        <div className="flex gap-2">
-          <select
-            value={specKey}
-            onChange={(e) => setSpecKey(e.target.value)}
-            className="w-1/2 rounded border px-3 py-2"
-          >
-            <option value="">Spec key</option>
-            {specOptions.map((spec) => (
-              <option key={spec} value={spec}>
+      <div className="mb-6 space-y-3">
+        <Label>Specs Listed</Label>
+        <div className="grid gap-2">
+          {specOptions.map((spec) => (
+            <div key={spec} className="flex items-center gap-2">
+              <input
+                type="checkbox"
+                id={`spec-${spec}`}
+                checked={selectedSpecs.includes(spec)}
+                onChange={() => toggleSpec(spec)}
+              />
+              <Label htmlFor={`spec-${spec}`} className="m-0 capitalize">
                 {spec.replace(/_/g, " ")}
-              </option>
-            ))}
-          </select>
-          <Input
-            type="text"
-            placeholder="Spec value"
-            value={specValue}
-            onChange={(e) => setSpecValue(e.target.value)}
-          />
+              </Label>
+            </div>
+          ))}
         </div>
       </div>
 
