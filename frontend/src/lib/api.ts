@@ -41,13 +41,9 @@ export const api = {
   delete: <T>(path: string) => request<T>("DELETE", path),
 };
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL;
+const API_URL = process.env.NEXT_PUBLIC_API_URL || BASE_URL;
 
 export async function apiFetch<T>(path: string): Promise<T> {
-  if (!API_URL) {
-    throw new Error("NEXT_PUBLIC_API_URL is missing");
-  }
-
   const res = await fetch(`${API_URL}${path}`, {
     cache: "no-store",
   });
