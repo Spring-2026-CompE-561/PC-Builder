@@ -1,6 +1,9 @@
 "use client";
 
 import { useState } from "react";
+import { useRouter } from "next/navigation";
+import { api } from "@/lib/api";
+import { useAuth } from "@/context/AuthContext";
 // ShadeCN Button instead of html
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -19,16 +22,65 @@ const USE_CASES = [
 const BRAND_OPTIONS = ["No preference", "AMD", "Intel", "NVIDIA", "Budget-friendly"];
 const AESTHETIC_OPTIONS = ["No preference", "Minimal / Sleek", "RGB / Flashy", "Black & White"];
 
+type GeneratedBuild = {
+  id: number;
+};
+
+
 export default function HomePage() {
   // controls which screen to show
   const [step, setStep] = useState("landing");
   const [experienceLevel, setExperienceLevel] = useState("beginner");
   const [useCase, setUseCase] = useState("gaming");
+  const router = useRouter();
+  const { user, isLoading: isAuthLoading } = useAuth();
+
 
   // form values
   const [budget, setBudget] = useState("1000");
   const [brandPref, setBrandPref] = useState("No preference");
   const [aesthetic, setAesthetic] = useState("No preference");
+  const [isGenerating, setIsGenerating] = useState(false);
+  const [error, setError] = useState("");
+
+  async function handleGenerateBuild() {
+    const numericBudget = Number(budget);
+
+    if (!Number.isFinite(numericBudget) || numericBudget < 300) {
+      setError("Please enter a valid budget of at least $300.");
+      return;
+    }
+
+    if (!user) {
+      router.push("/sign-in");
+      return;
+    }
+
+    try {
+      setIsGenerating(true);
+      setError("");
+
+      const preferredBrands =
+        brandPref !== "No preference" && brandPref !== "Budget-friendly"
+          ? [brandPref]
+          : undefined;
+
+      const data = await api.post<GeneratedBuild>("/builds/generate", {
+        budget: numericBudget,
+        use_case: useCase,
+        preferred_brands: preferredBrands,
+      });
+
+      router.push(`/builds/${data.id}`);
+    } catch (err) {
+      const message =
+        err instanceof Error ? err.message : "Could not generate build.";
+      setError(message);
+      setIsGenerating(false);
+    }
+  }
+
+
 
   // Home Page
   if (step === "landing") {
@@ -234,11 +286,23 @@ export default function HomePage() {
                   </div>
                 </>
               )}
+              
+              {error && (
+                <p className="rounded border border-red-900 bg-red-950/20 px-3 py-2 text-sm text-red-300">
+                  {error}
+                </p>
+              )}
 
               {/* Generate button */}
-              <Button className="w-full bg-green-500 text-black font-bold hover:bg-green-400 matrix-btn">
-                &gt; Generate My Build
+              <Button
+                type="button"
+                onClick={handleGenerateBuild}
+                disabled={isGenerating || isAuthLoading}
+                className="w-full bg-green-500 text-black font-bold hover:bg-green-400 matrix-btn disabled:opacity-60"
+              >
+                {isGenerating ? "> Generating..." : "> Generate My Build"}
               </Button>
+
 
             </CardContent>
           </Card>
