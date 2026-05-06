@@ -3,6 +3,10 @@ import os
 
 sys.path.insert(0, os.path.dirname(__file__))
 
+from app.models.user import User
+from app.models.build import Build, BuildPart
+from app.models.transaction import Transaction
+from app.models.category import Category
 from app.core.database import engine, SessionLocal, Base
 from app.models.part import Part, Pricing, PartType
 
