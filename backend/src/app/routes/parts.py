@@ -24,6 +24,18 @@ def _enrich(part: Part) -> dict:
 
 
 # list part
+def _filter_parts(parts: list[Part], max_price: Optional[float], in_stock_only: bool) -> list[dict]:
+    results = []
+    for p in parts:
+        e = _enrich(p)
+        if max_price and e["price"] and e["price"] > max_price:
+            continue
+        if in_stock_only and not e.get("in_stock"):
+            continue
+        results.append(e)
+    return results
+
+
 @router.get("/", response_model=list[PartOut])
 def list_parts(
     category: Optional[PartCategory] = None,
@@ -39,16 +51,27 @@ def list_parts(
         q = q.filter(Part.brand.ilike(f"%{brand}%"))
 
     parts = q.all()
+    return _filter_parts(parts, max_price, in_stock_only)
 
-    results = []
-    for p in parts:
-        e = _enrich(p)
-        if max_price and e["price"] and e["price"] > max_price:
-            continue
-        if in_stock_only and not e.get("in_stock"):
-            continue
-        results.append(e)
-    return results
+
+@router.get("/category/{category}", response_model=list[PartOut])
+def list_parts_by_category(
+    category: PartCategory,
+    max_price: Optional[float] = None,
+    brand: Optional[str] = None,
+    in_stock_only: bool = False,
+    db: Session = Depends(get_db),
+):
+    q = (
+        db.query(Part)
+        .options(joinedload(Part.pricing))
+        .filter(Part.is_active, Part.category == category)
+    )
+    if brand:
+        q = q.filter(Part.brand.ilike(f"%{brand}%"))
+
+    parts = q.all()
+    return _filter_parts(parts, max_price, in_stock_only)
 
 
 # part router
