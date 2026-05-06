@@ -6,6 +6,7 @@ export type Part = {
   category: string;
   brand: string;
   price?: number;
+  in_stock?: boolean;
 
   // optional because backend may vary
   compatibility?: string;
