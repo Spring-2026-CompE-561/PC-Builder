@@ -2,11 +2,11 @@
 
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent } from "@/components/ui/sheet";
 import { useAuth } from "@/context/AuthContext";
-import { Cpu, LogOut, Menu, User } from "lucide-react";
+import { Cpu, LogOut, Menu, User, Sun, Moon } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 const NAV_LINKS = [
@@ -20,6 +20,27 @@ export function Navbar() {
   const pathname = usePathname();
   const router = useRouter();
   const [mobileOpen, setMobileOpen] = useState(false);
+  const [darkMode, setDarkMode] = useState(true);
+
+  useEffect(() => {
+    const saved = localStorage.getItem("theme");
+    if (saved === "light") {
+      setDarkMode(false);
+      document.documentElement.classList.add("light");
+    }
+  }, []);
+
+  const toggleTheme = () => {
+    const next = !darkMode;
+    setDarkMode(next);
+    if (next) {
+      document.documentElement.classList.remove("light");
+      localStorage.setItem("theme", "dark");
+    } else {
+      document.documentElement.classList.add("light");
+      localStorage.setItem("theme", "light");
+    }
+  };
 
   const handleLogout = () => {
     logout();
@@ -107,12 +128,19 @@ export function Navbar() {
             <NavLinks />
           </nav>
 
-          {/* Desktop auth buttons */}
+          {/* Desktop auth + theme toggle */}
           <div className="hidden md:flex items-center gap-2">
+            <button
+              onClick={toggleTheme}
+              className="p-2 rounded-md hover:bg-accent transition-colors"
+              aria-label="Toggle theme"
+            >
+              {darkMode ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
+            </button>
             <AuthButtons />
           </div>
 
-          {/* Mobile hamburger - plain button, no asChild needed */}
+          {/* Mobile hamburger */}
           <button
             className="md:hidden p-2 rounded-md hover:bg-accent transition-colors"
             onClick={() => setMobileOpen(true)}
@@ -121,7 +149,7 @@ export function Navbar() {
             <Menu className="w-5 h-5" />
           </button>
 
-          {/* Mobile sheet controlled purely by state */}
+          {/* Mobile sheet */}
           <Sheet open={mobileOpen} onOpenChange={setMobileOpen}>
             <SheetContent side="right" className="w-72">
               <div className="flex flex-col gap-6 mt-8">
@@ -129,6 +157,13 @@ export function Navbar() {
                   <NavLinks onClick={() => setMobileOpen(false)} />
                 </nav>
                 <div className="border-t pt-4 flex flex-col gap-2">
+                  <button
+                    onClick={toggleTheme}
+                    className="flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground"
+                  >
+                    {darkMode ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
+                    {darkMode ? "Light mode" : "Dark mode"}
+                  </button>
                   <AuthButtons onClick={() => setMobileOpen(false)} />
                 </div>
               </div>

@@ -1,19 +1,17 @@
 "use client";
 
 import { useState } from "react";
-// ShadeCN Button instead of html
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 
-// the different archtype of computer to select
+// the different archetypes of computer to select
 const USE_CASES = [
   { value: "gaming", label: "Gaming", description: "High FPS, streaming" },
   { value: "workstation", label: "Workstation", description: "3D, rendering, multitasking" },
-  { value: "video_editing", label: "Video Editing", description: "4K editing, color grading" },
-  { value: "programming", label: "Programming", description: "Dev work, VMs, compiling" },
-  { value: "general", label: "General Use", description: "Browsing, everyday tasks" },
+  { value: "office", label: "Office", description: "Browsing, everyday tasks" },
+  { value: "budget", label: "Budget", description: "Best value for your money" },
 ];
 
 const BRAND_OPTIONS = ["No preference", "AMD", "Intel", "NVIDIA", "Budget-friendly"];
@@ -35,68 +33,67 @@ export default function HomePage() {
     return (
       <div>
         {/* Front Banner */}
-        <div className="bg-black border-b border-green-900 py-24 text-center px-4">
-          <p className="text-green-700 text-sm tracking-widest mb-4">
+        <div className="bg-background border-b border-border py-24 text-center px-4">
+          <p className="text-muted-foreground text-sm tracking-widest mb-4">
             &gt; initializing pc_builder.exe...
           </p>
-          <h1 className="text-5xl font-bold text-green-400 matrix-glow mb-4">
+          <h1 className="text-5xl font-bold text-primary matrix-glow mb-4">
             Build Your Perfect PC
           </h1>
-          <p className="text-green-700 text-lg mb-10 max-w-lg mx-auto">
+          <p className="text-muted-foreground text-lg mb-10 max-w-lg mx-auto">
             Tell us your budget and what you need — we'll pick the best parts for you.
           </p>
           {/* Two Buttons for beginner vs experienced */}
           <div className="flex flex-col sm:flex-row gap-3 justify-center">
             <Button
               onClick={() => { setExperienceLevel("beginner"); setStep("form"); }}
-              className="bg-green-500 text-black font-bold px-6 py-3 hover:bg-green-400 matrix-btn"
+              className="bg-primary text-primary-foreground font-bold px-6 py-3 hover:bg-primary/90 matrix-btn"
             >
               I'm new to PC building
             </Button>
             <Button
               variant="outline"
               onClick={() => { setExperienceLevel("experienced"); setStep("form"); }}
-              className="border-green-700 text-green-400 px-6 py-3 hover:bg-green-950"
+              className="border-border text-primary px-6 py-3 hover:bg-accent"
             >
               I know what I'm doing
             </Button>
           </div>
         </div>
 
-        {/* Description of how our model works */}
-        <div className="py-12 px-4 bg-black">
-          <h2 className="text-xl font-bold text-center text-green-400 mb-10 tracking-widest uppercase">
+        {/* How it works */}
+        <div className="py-16 px-4 bg-background">
+          <h2 className="text-xl font-bold text-center text-primary mb-10 tracking-widest uppercase">
             How it works
           </h2>
           <div className="max-w-4xl mx-auto grid sm:grid-cols-3 gap-8 text-center">
             <div>
-              <div className="w-10 h-10 border border-green-600 text-green-400 rounded-full flex items-center justify-center font-bold mx-auto mb-3 matrix-glow">
+              <div className="w-10 h-10 border border-border text-primary rounded-full flex items-center justify-center font-bold mx-auto mb-3 matrix-glow">
                 1
               </div>
-              <h3 className="font-semibold text-green-300 mb-1">Set your budget</h3>
-              <p className="text-sm text-green-800">Tell us how much you want to spend.</p>
+              <h3 className="font-semibold text-foreground mb-1">Set your budget</h3>
+              <p className="text-sm text-muted-foreground">Tell us how much you want to spend.</p>
             </div>
             <div>
-              <div className="w-10 h-10 border border-green-600 text-green-400 rounded-full flex items-center justify-center font-bold mx-auto mb-3 matrix-glow">
+              <div className="w-10 h-10 border border-border text-primary rounded-full flex items-center justify-center font-bold mx-auto mb-3 matrix-glow">
                 2
               </div>
-              <h3 className="font-semibold text-green-300 mb-1">Pick your use case</h3>
-              <p className="text-sm text-green-800">Gaming, work, video editing — we tailor the build.</p>
+              <h3 className="font-semibold text-foreground mb-1">Pick your use case</h3>
+              <p className="text-sm text-muted-foreground">Gaming, work, video editing — we tailor the build.</p>
             </div>
             <div>
-              <div className="w-10 h-10 border border-green-600 text-green-400 rounded-full flex items-center justify-center font-bold mx-auto mb-3 matrix-glow">
+              <div className="w-10 h-10 border border-border text-primary rounded-full flex items-center justify-center font-bold mx-auto mb-3 matrix-glow">
                 3
               </div>
-              <h3 className="font-semibold text-green-300 mb-1">Get your build</h3>
-              <p className="text-sm text-green-800">Full parts list with pros, cons, and alternatives.</p>
+              <h3 className="font-semibold text-foreground mb-1">Get your build</h3>
+              <p className="text-sm text-muted-foreground">Full parts list with pros, cons, and alternatives.</p>
             </div>
           </div>
         </div>
-        
 
-        {/* Shortcut straight to computer archtype */}
-        <div className="py-12 px-4 bg-[#030f03] text-center border-t border-green-950 mt-auto">
-          <h2 className="text-sm font-bold mb-6 text-green-700 tracking-widest uppercase">
+        {/* Shortcuts */}
+        <div className="py-12 px-4 bg-card text-center border-t border-border">
+          <h2 className="text-sm font-bold mb-6 text-muted-foreground tracking-widest uppercase">
             &gt; Or jump straight in
           </h2>
           <div className="flex flex-wrap justify-center gap-3">
@@ -105,17 +102,18 @@ export default function HomePage() {
                 key={uc.value}
                 variant="outline"
                 onClick={() => { setUseCase(uc.value); setExperienceLevel("beginner"); setStep("form"); }}
-                className="border-green-900 bg-black text-green-600 hover:border-green-500 hover:text-green-400"
+                className="border-border bg-background text-muted-foreground hover:border-primary hover:text-primary"
               >
                 {uc.label}
               </Button>
             ))}
           </div>
         </div>
-                {/* Completed Builds */}
-        <div className="pt-6 pb-14 px-6 bg-black border-t border-green-950">
+
+        {/* Completed Builds */}
+        <div className="pt-6 pb-14 px-6 bg-background border-t border-border">
           <div className="max-w-7xl mx-auto">
-            <h2 className="text-green-400 font-bold text-3xl tracking-widest uppercase matrix-glow mb-8 text-center">
+            <h2 className="text-primary font-bold text-3xl tracking-widest uppercase matrix-glow mb-8 text-center">
               Completed Builds
             </h2>
             <div className="grid grid-cols-5 gap-8 px-4">
@@ -126,41 +124,41 @@ export default function HomePage() {
                 { img: "/build4.jpg", user: "Slime" },
                 { img: "/build5.jpg", user: "Rockman" },
               ].map((build) => (
-                <div key={build.user} className="border border-green-900 bg-[#030f03]">
+                <div key={build.user} className="border border-border bg-card">
                   <img src={build.img} alt={`build by ${build.user}`} className="w-full h-48 object-cover" />
-                  <p className="text-green-600 text-sm px-3 py-2">by {build.user}</p>
+                  <p className="text-muted-foreground text-sm px-3 py-2">by {build.user}</p>
                 </div>
               ))}
             </div>
           </div>
         </div>
-        </div>
+      </div>
     );
   }
 
-  // Build generator 
+  // Build generator
   if (step === "form") {
     return (
-      <div className="bg-black min-h-screen">
+      <div className="bg-background min-h-screen">
         <div className="max-w-xl mx-auto px-4 py-10">
 
           {/* Back button */}
           <Button
             variant="ghost"
             onClick={() => setStep("landing")}
-            className="text-green-800 hover:text-green-500 mb-6 px-0"
+            className="text-muted-foreground hover:text-primary mb-6 px-0"
           >
             ← back
           </Button>
 
           {/* Build card */}
-          <Card className="bg-black border-green-900">
+          <Card className="bg-background border-border">
             <CardHeader>
-              <span className="text-xs bg-green-950 text-green-500 border border-green-800 px-2 py-1 w-fit">
+              <span className="text-xs bg-accent text-primary border border-border px-2 py-1 w-fit">
                 {experienceLevel === "beginner" ? "// guided build" : "// quick build"}
               </span>
-              <CardTitle className="text-green-300 text-2xl">Configure your build</CardTitle>
-              <CardDescription className="text-green-800">
+              <CardTitle className="text-foreground text-2xl">Configure your build</CardTitle>
+              <CardDescription className="text-muted-foreground">
                 {experienceLevel === "beginner"
                   ? "We'll walk you through everything."
                   : "Just set your budget and use case — we'll handle the rest."}
@@ -171,9 +169,9 @@ export default function HomePage() {
 
               {/* Budget input */}
               <div>
-                <Label className="text-green-400 mb-1">Total Budget (USD)</Label>
-                <div className="flex items-center border border-green-900 bg-black focus-within:border-green-500 transition-colors">
-                  <span className="px-3 text-green-700">$</span>
+                <Label className="text-primary mb-1">Total Budget (USD)</Label>
+                <div className="flex items-center border border-border bg-background focus-within:border-primary transition-colors">
+                  <span className="px-3 text-muted-foreground">$</span>
                   <Input
                     type="number"
                     min={300}
@@ -181,15 +179,15 @@ export default function HomePage() {
                     value={budget}
                     onChange={(e) => setBudget(e.target.value)}
                     placeholder="e.g. 1000"
-                    className="border-0 bg-black text-green-400 placeholder:text-green-900 focus-visible:ring-0"
+                    className="border-0 bg-background text-foreground placeholder:text-muted-foreground focus-visible:ring-0"
                   />
                 </div>
-                <p className="text-xs text-green-900 mt-1">Minimum $300</p>
+                <p className="text-xs text-muted-foreground mt-1">Minimum $300</p>
               </div>
 
               {/* Use case picker */}
               <div>
-                <Label className="text-green-400 mb-2">What will you use this PC for?</Label>
+                <Label className="text-primary mb-2">What will you use this PC for?</Label>
                 <div className="grid grid-cols-2 gap-2 mt-1">
                   {USE_CASES.map((uc) => (
                     <button
@@ -197,12 +195,12 @@ export default function HomePage() {
                       onClick={() => setUseCase(uc.value)}
                       className={`p-3 border text-left text-sm transition-all ${
                         useCase === uc.value
-                          ? "border-green-500 bg-green-950 text-green-300"
-                          : "border-green-900 bg-black text-green-700 hover:border-green-700"
+                          ? "border-primary bg-accent text-foreground"
+                          : "border-border bg-background text-muted-foreground hover:border-primary"
                       }`}
                     >
                       <div className="font-medium">{uc.label}</div>
-                      <div className="text-xs text-green-800 mt-0.5">{uc.description}</div>
+                      <div className="text-xs text-muted-foreground mt-0.5">{uc.description}</div>
                     </button>
                   ))}
                 </div>
@@ -212,31 +210,31 @@ export default function HomePage() {
               {experienceLevel === "beginner" && (
                 <>
                   <div>
-                    <Label className="text-green-400 mb-1">Brand Preference</Label>
+                    <Label className="text-primary mb-1">Brand Preference</Label>
                     <select
                       value={brandPref}
                       onChange={(e) => setBrandPref(e.target.value)}
-                      className="w-full border border-green-900 px-3 py-2 text-sm bg-black text-green-400 focus:outline-none focus:border-green-500 mt-1"
+                      className="w-full border border-border px-3 py-2 text-sm bg-background text-foreground focus:outline-none focus:border-primary mt-1"
                     >
-                      {BRAND_OPTIONS.map((b) => <option key={b} className="bg-black">{b}</option>)}
+                      {BRAND_OPTIONS.map((b) => <option key={b} className="bg-background">{b}</option>)}
                     </select>
                   </div>
 
                   <div>
-                    <Label className="text-green-400 mb-1">Case Aesthetic</Label>
+                    <Label className="text-primary mb-1">Case Aesthetic</Label>
                     <select
                       value={aesthetic}
                       onChange={(e) => setAesthetic(e.target.value)}
-                      className="w-full border border-green-900 px-3 py-2 text-sm bg-black text-green-400 focus:outline-none focus:border-green-500 mt-1"
+                      className="w-full border border-border px-3 py-2 text-sm bg-background text-foreground focus:outline-none focus:border-primary mt-1"
                     >
-                      {AESTHETIC_OPTIONS.map((a) => <option key={a} className="bg-black">{a}</option>)}
+                      {AESTHETIC_OPTIONS.map((a) => <option key={a} className="bg-background">{a}</option>)}
                     </select>
                   </div>
                 </>
               )}
 
               {/* Generate button */}
-              <Button className="w-full bg-green-500 text-black font-bold hover:bg-green-400 matrix-btn">
+              <Button className="w-full bg-primary text-primary-foreground font-bold hover:bg-primary/90 matrix-btn">
                 &gt; Generate My Build
               </Button>
 
