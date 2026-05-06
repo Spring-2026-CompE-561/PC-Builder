@@ -29,6 +29,7 @@ def _register_user(client: TestClient):
         "/auth/register",
         json={
             "name": "Test User",
+            "username": "testuser",
             "email": "test.user@example.com",
             "password": "test1234",
         },
