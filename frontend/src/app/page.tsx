@@ -64,7 +64,7 @@ export default function HomePage() {
         </div>
 
         {/* Description of how our model works */}
-        <div className="py-16 px-4 bg-black">
+        <div className="py-12 px-4 bg-black">
           <h2 className="text-xl font-bold text-center text-green-400 mb-10 tracking-widest uppercase">
             How it works
           </h2>
@@ -92,9 +92,10 @@ export default function HomePage() {
             </div>
           </div>
         </div>
+        
 
         {/* Shortcut straight to computer archtype */}
-        <div className="py-12 px-4 bg-[#030f03] text-center border-t border-green-950">
+        <div className="py-12 px-4 bg-[#030f03] text-center border-t border-green-950 mt-auto">
           <h2 className="text-sm font-bold mb-6 text-green-700 tracking-widest uppercase">
             &gt; Or jump straight in
           </h2>
@@ -111,7 +112,29 @@ export default function HomePage() {
             ))}
           </div>
         </div>
-      </div>
+                {/* Completed Builds */}
+        <div className="pt-6 pb-14 px-6 bg-black border-t border-green-950">
+          <div className="max-w-7xl mx-auto">
+            <h2 className="text-green-400 font-bold text-3xl tracking-widest uppercase matrix-glow mb-8 text-center">
+              Completed Builds
+            </h2>
+            <div className="grid grid-cols-5 gap-8 px-4">
+              {[
+                { img: "/build1.jpg", user: "KyleTOS" },
+                { img: "/build2.jpg", user: "Krill" },
+                { img: "/build3.jpg", user: "DonnyDigital" },
+                { img: "/build4.jpg", user: "Slime" },
+                { img: "/build5.jpg", user: "Rockman" },
+              ].map((build) => (
+                <div key={build.user} className="border border-green-900 bg-[#030f03]">
+                  <img src={build.img} alt={`build by ${build.user}`} className="w-full h-48 object-cover" />
+                  <p className="text-green-600 text-sm px-3 py-2">by {build.user}</p>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+        </div>
     );
   }
 
