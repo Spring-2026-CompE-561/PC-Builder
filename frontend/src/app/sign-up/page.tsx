@@ -125,7 +125,7 @@ export default function SignUpPage() {
               <Input
                 id="name"
                 type="text"
-                placeholder="Housain Al Safar"
+                placeholder="First Last"
                 value={name}
                 onChange={(e) => setName(e.target.value)}
                 required
