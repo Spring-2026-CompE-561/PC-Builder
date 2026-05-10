@@ -13,3 +13,4 @@ http://localhost:3000/
 
 Cybersecurity Features:
 Rate Limiting - Currently times you out for 30 seconds after 3 failed attempts. This can be easily expanded on.
+Passwork Strength Indicator - Gives you a visual indicator for password strength levels based on a hardcoded algorithm.
