@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -15,17 +15,45 @@ interface LoginResponse {
   token_type: string;
 }
 
+const MAX_ATTEMPTS = 3;
+const LOCKOUT_SECONDS = 30;
+
 export default function SignInPage() {
-  const { login } = useAuth();
+  const { login, user, isLoading: authLoading } = useAuth();
   const router = useRouter();
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
+  const [failedAttempts, setFailedAttempts] = useState(0);
+  const [lockedUntil, setLockedUntil] = useState<number | null>(null);
+  const [countdown, setCountdown] = useState(0);
+
+  useEffect(() => {
+    if (!authLoading && user) router.push("/");
+  }, [user, authLoading, router]);
+
+  useEffect(() => {
+    if (!lockedUntil) return;
+    const interval = setInterval(() => {
+      const remaining = Math.ceil((lockedUntil - Date.now()) / 1000);
+      if (remaining <= 0) {
+        setLockedUntil(null);
+        setCountdown(0);
+        setFailedAttempts(0);
+      } else {
+        setCountdown(remaining);
+      }
+    }, 1000);
+    return () => clearInterval(interval);
+  }, [lockedUntil]);
+
+  const isLocked = lockedUntil !== null && Date.now() < lockedUntil;
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (isLocked) return;
     setError(null);
     setIsLoading(true);
 
@@ -34,7 +62,19 @@ export default function SignInPage() {
       await login(data.access_token);
       router.push("/");
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Invalid email or password.");
+      const newAttempts = failedAttempts + 1;
+      setFailedAttempts(newAttempts);
+
+      if (newAttempts >= MAX_ATTEMPTS) {
+        const until = Date.now() + LOCKOUT_SECONDS * 1000;
+        setLockedUntil(until);
+        setError(`Too many failed attempts. Try again in ${LOCKOUT_SECONDS} seconds.`);
+      } else {
+        const remaining = MAX_ATTEMPTS - newAttempts;
+        setError(
+          `${err instanceof Error ? err.message : "Invalid email or password."} ${remaining} attempt${remaining === 1 ? "" : "s"} remaining.`
+        );
+      }
     } finally {
       setIsLoading(false);
     }
@@ -66,6 +106,7 @@ export default function SignInPage() {
                 onChange={(e) => setEmail(e.target.value)}
                 required
                 autoComplete="email"
+                disabled={isLocked}
               />
             </div>
 
@@ -79,13 +120,18 @@ export default function SignInPage() {
                 onChange={(e) => setPassword(e.target.value)}
                 required
                 autoComplete="current-password"
+                disabled={isLocked}
               />
             </div>
           </CardContent>
 
           <CardFooter className="flex flex-col gap-4">
-            <Button type="submit" className="w-full" disabled={isLoading}>
-              {isLoading ? "Signing in..." : "Sign In"}
+            <Button type="submit" className="w-full" disabled={isLoading || isLocked}>
+              {isLocked
+                ? `Locked — wait ${countdown}s`
+                : isLoading
+                ? "Signing in..."
+                : "Sign In"}
             </Button>
             <p className="text-sm text-muted-foreground text-center">
               Don&apos;t have an account?{" "}

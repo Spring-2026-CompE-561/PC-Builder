@@ -12,14 +12,20 @@ async function request<T>(
   path: string,
   body?: unknown
 ): Promise<T> {
-  const res = await fetch(`${BASE_URL}${path}`, {
-    method,
-    headers: {
-      "Content-Type": "application/json",
-      ...getAuthHeader(),
-    },
-    body: body ? JSON.stringify(body) : undefined,
-  });
+  let res: Response;
+
+  try {
+    res = await fetch(`${BASE_URL}${path}`, {
+      method,
+      headers: {
+        "Content-Type": "application/json",
+        ...getAuthHeader(),
+      },
+      body: body ? JSON.stringify(body) : undefined,
+    });
+  } catch {
+    throw new Error("Cannot reach the server. Make sure the backend is running.");
+  }
 
   if (!res.ok) {
     const error = await res.json().catch(() => ({ detail: "Request failed" }));
