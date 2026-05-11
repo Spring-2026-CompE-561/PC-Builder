@@ -12,16 +12,15 @@ PC Builder is a website that takes in a user's budget, preferences, and use case
 - Allow users to search for, filter by price and specs, swap parts, and update quantities.
 - Allow users to export builds for later.
 - Basic user registration/login, allowing users to view/edit/delete saved builds.
-- Display the most popular parts from users.
 
 ### Cybersecurity Features:
 #### Rate Limiting
-- Currently times you out for 30 seconds after 3 failed attempts. 
+- Login page times out for 30 seconds after 3 failed attempts. 
 - This is scalable, and can be changed as needed.
 #### Passwork Strength Indicator
 - Gives users a real-time visual indicator for password strength levels based on a hardcoded algorithm.
 
-### Optional Upgrades
+### Future Upgrades
 - Compare two builds side-by-side.
 - Live price tracking.
 - Build templates.
@@ -48,8 +47,7 @@ List of virtual enviroment dependencies can be found in `pyproject.toml`.
 - VS Code with an integrated PowerShell terminal.
 - This repository cloned locally.
 - Python installed matching `.python-version`.
-- Node.js installed from [here](https://nodejs.org/en/download).
-- 
+- [Node.js](https://nodejs.org/en/download).
 
 ### Setup Pre-Commit
 ```powershell
