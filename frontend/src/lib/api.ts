@@ -29,8 +29,18 @@ async function request<T>(
 
   if (!res.ok) {
     const error = await res.json().catch(() => ({ detail: "Request failed" }));
-    throw new Error(error.detail || `HTTP ${res.status}`);
+
+    if (typeof error.detail === "string") {
+      throw new Error(error.detail);
+    }
+
+    if (error.detail?.compatibility_errors?.length) {
+      throw new Error(error.detail.compatibility_errors.join(", "));
+    }
+
+    throw new Error(`HTTP ${res.status}`);
   }
+
 
   if (res.status === 204) {
     return undefined as T;
