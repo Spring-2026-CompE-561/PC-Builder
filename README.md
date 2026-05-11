@@ -1,91 +1,138 @@
 ﻿# PC Builder
 
 ## Overview
-PC Builder is a website that takes in a user's budget, preferences, and use case, and recommends the best possible PC components. The goal is to simplify the PC buying and building process, especially for beginners.
-
->MVP: A one-page website where an user can enter a budget and some basic preferences, and get one recommended, compatible PC build with a total price and per-part breakdown, plus a way to export it.
+PC Builder is a full-stack web application that helps users create custom PC builds based on budget, use case, and preferences. The goal is to simplify the PC building process, especially for beginners, while still supporting users who want more manual control.
 
 ### Core Features
-- Accepts user budget, use case, brand preferences, aesthetic preferences, and other details.
-- Generates a recommended build.
-- Displays total cost and per-part breakdown.
-- Allow users to search for, filter by price and specs, swap parts, and update quantities.
-- Allow users to export builds for later.
-- Basic user registration/login, allowing users to view/edit/delete saved builds.
+- Guided build generation based on budget and use case
+- Manual build creation from scratch
+- Parts browsing by category
+- Part detail pages
+- User registration, login, logout, and delete account
+- Saved builds list and build details view
+- Export build data
+- Delete saved builds
+- About and Privacy pages
 
-### Cybersecurity Features:
-#### Rate Limiting
-- Login page times out for 30 seconds after 3 failed attempts. 
-- This is scalable, and can be changed as needed.
-#### Passwork Strength Indicator
-- Gives users a real-time visual indicator for password strength levels based on a hardcoded algorithm.
-
-### Future Upgrades
-- Compare two builds side-by-side.
-- Live price tracking.
-- Build templates.
+### Cybersecurity Features
+- Login rate limiting after repeated failed attempts
+- Password strength indicator during account creation
+- JWT-based authentication for protected features
 
 ### Tech Stack
 | Layer | Technology |
 |---|---|
-| Frontend | React + Next.js |
-| Design | ShadCN UI + Tailwind CSS |
-| Backend | FastAPI + Pydantic |
-| Database | SQLAlchemy |
-| Server | Uvicorn |
-| Authentication | Python-Jose + Passlib (JWT) |
-| Middleware | CORS + Logging |
+| Frontend | Next.js + React |
+| UI | ShadCN UI + Tailwind CSS |
+| Backend | FastAPI + UV |
+| Database | PostgreSQL + SQLAlchemy |
+| Authentication | Python-Jose + Passlib |
+| Testing | Pytest, Pytest-Cov, Playwright |
 | Code Quality | Ruff + Pre-Commit |
 
-The website uses ShadCN UI - Lyra Preset (JetBrains Mono + Phosphor Icons).
+## Prerequisites
+- Python 3.13
+- Node.js and npm
+- PostgreSQL
+- uv
 
-## Setup Development Environment
+## Setup
 
-List of virtual enviroment dependencies can be found in `pyproject.toml`.
+```md
+### 1. Clone the repository
+```bash
+git clone https://github.com/Spring-2026-CompE-561/PC-Builder.git
+cd PC-Builder
 
-### Prerequisites
-- VS Code with an integrated PowerShell terminal.
-- This repository cloned locally.
-- Python installed matching `.python-version`.
-- [Node.js](https://nodejs.org/en/download).
-
-### Setup Pre-Commit
-```powershell
-py -m pip install -U pip pre-commit
-
-pre-commit install
-
-pre-commit run --all-files
-
+### 2. Install backend dependencies
+```bash
+uv sync
 ```
 
-## Final Run Instructions
+### 3. Install frontend dependencies
+```bash
+cd frontend
+npm install
+cd ..
+```
+
+### 4. Create the PostgreSQL database
+Make sure PostgreSQL is running, then create a database named `pcbuilder`.
+
+Example:
+```bash
+createdb pcbuilder
+```
+
+### 5. Create a `.env` file in the project root
+Add your local PostgreSQL connection string:
+
+```env
+DATABASE_URL=postgresql://YOUR_POSTGRES_USER:YOUR_POSTGRES_PASSWORD@localhost:5432/pcbuilder
+```
+
+If your PostgreSQL setup does not use a password, you can use:
+
+```env
+DATABASE_URL=postgresql://YOUR_POSTGRES_USER@localhost:5432/pcbuilder
+```
+
+### 6. Seed the sample parts data
+```bash
+uv run python backend/src/seed.py
+```
+
+## Run the Project
 
 ### Backend
+Run from the project root:
+
 ```bash
-DATABASE_URL="postgresql://postgres@localhost:5433/pcbuilder" PYTHONPATH=backend/src uv run uvicorn backend.main:app --reload
+PYTHONPATH=backend/src uv run uvicorn backend.main:app --reload
 ```
 
 ### Frontend
+Run from the `frontend` folder:
+
 ```bash
 cd frontend
 npm run dev -- --webpack
 ```
 
+Then open:
+- `http://localhost:3000`
+
+Note:
+- The frontend already falls back to `http://localhost:8000` for API calls, so no frontend env file is required for local use.
+
+## Main Functionalities
+- User registration, login, logout, and delete account
+- Guided build generation from the home page
+- Manual build creation from scratch
+- Parts browsing and part details
+- Saved builds list and build details page
+- Export build data
+- Delete saved builds
+- About and Privacy pages
+
 ## Testing
 
-### Backend Tests
+### Backend Unit Tests
+Run from the project root:
+
 ```bash
-DATABASE_URL="postgresql://postgres@localhost:5433/pcbuilder" PYTHONPATH=backend/src uv run pytest backend/tests --cov=backend/src/app --cov-report=term-missing
+PYTHONPATH=backend/src uv run pytest backend/tests --cov=backend/src/app --cov-report=term-missing
 ```
 
 Verified result:
 - `8` backend tests passed
-- `76%` coverage
+- `76%` backend coverage
 
-### Playwright Tests
+### Frontend/Backend Integration Tests
+Run from the `frontend` folder:
+
 ```bash
-cd frontend
+npx playwright install
 npm run test:e2e
 ```
 

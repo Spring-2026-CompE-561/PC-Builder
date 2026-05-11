@@ -1,0 +1,26 @@
+PC Builder is a full-stack web application built with Next.js, ShadCN UI, Tailwind CSS, FastAPI, UV, and PostgreSQL. The website helps users create custom PC builds based on budget, use case, and preferences. Users can register, sign in, sign out, delete their account, generate guided builds from the home page, browse parts by category, open part detail pages, create manual builds from scratch, save builds, open saved build details, export builds, and delete saved builds. The frontend communicates with the backend through API calls for authentication, parts data, build generation, manual build creation, saved build management, build details, and account actions.
+
+GitHub Repository:
+https://github.com/Spring-2026-CompE-561/PC-Builder
+
+Main Functionalities:
+- User registration, login, logout, and delete account
+- Guided build generation from the home page
+- Manual build creation from scratch
+- Parts browsing by category
+- Part detail pages
+- Saved builds list and build details view
+- Export build data
+- Delete saved builds
+- About and Privacy pages
+
+What was completed:
+- Built a full-stack PC builder application using Next.js on the frontend and FastAPI on the backend
+- Connected the frontend to the backend with API calls
+- Added PostgreSQL database support
+- Implemented authentication with user account features
+- Added guided build generation and manual build creation
+- Added saved builds, build details, export, and delete features
+- Added account deletion
+- Added backend unit tests and frontend/backend integration tests
+- Reached 76% backend test coverage and verified frontend/backend integration with Playwright
