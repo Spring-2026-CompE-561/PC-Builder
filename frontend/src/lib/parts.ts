@@ -5,10 +5,10 @@ export type Part = {
   name: string;
   category: string;
   brand: string;
+  image_url?: string;
   price?: number;
   in_stock?: boolean;
 
-  // optional because backend may vary
   compatibility?: string;
   specs?: Record<string, unknown>;
 };
@@ -17,6 +17,7 @@ export type PartQuery = {
   category?: string;
   minPrice?: number;
   maxPrice?: number;
+  image_url?: string;
   brand?: string;
   inStockOnly?: boolean;
   sort?: "price_asc" | "price_desc";

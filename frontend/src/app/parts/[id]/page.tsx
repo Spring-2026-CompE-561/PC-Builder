@@ -1,10 +1,11 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { useParams } from "next/navigation";
-import { getPartById } from "@/lib/parts";
 import Link from "next/link";
+import { useParams } from "next/navigation";
+
 import { Button } from "@/components/ui/button";
+import { getPartById } from "@/lib/parts";
 import type { Part } from "@/lib/parts";
 
 export default function PartDetailPage() {
@@ -76,13 +77,15 @@ export default function PartDetailPage() {
 
   return (
     <div className="container mx-auto py-8">
-      {/* Breadcrumb */}
       <div className="mb-6 flex items-center gap-2 text-sm">
         <Link href="/parts" className="text-blue-600 hover:underline">
           Components
         </Link>
         <span className="text-gray-400">/</span>
-        <Link href={`/parts/category/${part.category}`} className="text-blue-600 hover:underline capitalize">
+        <Link
+          href={`/parts/category/${part.category}`}
+          className="capitalize text-blue-600 hover:underline"
+        >
           {part.category}
         </Link>
         <span className="text-gray-400">/</span>
@@ -90,11 +93,10 @@ export default function PartDetailPage() {
       </div>
 
       <div className="grid gap-8 md:grid-cols-2">
-        {/* Image Section */}
         <div className="flex items-center justify-center rounded-lg border bg-gray-50 p-8">
-          {part.specs?.image_url ? (
+          {part.image_url ? (
             <img
-              src={part.specs.image_url}
+              src={part.image_url}
               alt={part.name}
               className="max-h-96 max-w-full object-contain"
             />
@@ -105,31 +107,29 @@ export default function PartDetailPage() {
           )}
         </div>
 
-        {/* Details Section */}
         <div>
           <h1 className="mb-2 text-3xl font-bold">{part.name}</h1>
           <p className="mb-4 text-gray-600">{part.brand}</p>
 
-          {/* Category Badge */}
           <Link href={`/parts/category/${part.category}`}>
             <span className="mb-6 inline-block rounded-full bg-blue-100 px-3 py-1 text-sm capitalize text-blue-700 hover:bg-blue-200">
               {part.category}
             </span>
           </Link>
 
-          {/* Price Section */}
           <div className="mb-8 rounded-lg border-2 border-green-200 bg-green-50 p-6">
             {part.price ? (
               <>
                 <p className="text-sm text-gray-600">Price</p>
-                <p className="text-4xl font-bold text-green-700">${part.price.toFixed(2)}</p>
+                <p className="text-4xl font-bold text-green-700">
+                  ${part.price.toFixed(2)}
+                </p>
               </>
             ) : (
               <p className="text-gray-500">Price not available</p>
             )}
           </div>
 
-          {/* Stock Status */}
           {part.compatibility && (
             <div className="mb-6 rounded-lg bg-blue-50 p-4">
               <p className="text-sm font-semibold text-gray-700">Status</p>
@@ -137,16 +137,19 @@ export default function PartDetailPage() {
             </div>
           )}
 
-          {/* Specifications */}
           {part.specs && Object.keys(part.specs).length > 0 && (
             <div className="mb-8">
               <h2 className="mb-4 text-xl font-semibold">Specifications</h2>
               <div className="space-y-3">
                 {Object.entries(part.specs).map(([key, value]) => (
                   <div key={key} className="flex justify-between border-b pb-2">
-                    <span className="capitalize text-gray-600">{key.replace(/_/g, " ")}</span>
+                    <span className="capitalize text-gray-600">
+                      {key.replace(/_/g, " ")}
+                    </span>
                     <span className="font-semibold text-gray-900">
-                      {typeof value === "object" ? JSON.stringify(value) : String(value)}
+                      {typeof value === "object"
+                        ? JSON.stringify(value)
+                        : String(value)}
                     </span>
                   </div>
                 ))}
@@ -154,7 +157,6 @@ export default function PartDetailPage() {
             </div>
           )}
 
-          {/* Action Buttons */}
           <div className="flex gap-3">
             <Button size="lg" className="flex-1">
               Add to Build
@@ -164,7 +166,6 @@ export default function PartDetailPage() {
             </Button>
           </div>
 
-          {/* Back to Parts */}
           <Link href="/parts">
             <button className="mt-4 w-full rounded border border-gray-300 px-4 py-2 text-gray-700 hover:bg-gray-50">
               ← Back to Components
