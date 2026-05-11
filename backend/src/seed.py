@@ -5,6 +5,10 @@ sys.path.insert(0, os.path.dirname(__file__))
 
 from app.core.database import engine, SessionLocal, Base
 from app.models.part import Part, Pricing, PartType
+from app.models import build as _build_models  # noqa: F401
+from app.models import category as _category_models  # noqa: F401
+from app.models import transaction as _transaction_models  # noqa: F401
+from app.models import user as _user_models  # noqa: F401
 
 
 # Create all tables
