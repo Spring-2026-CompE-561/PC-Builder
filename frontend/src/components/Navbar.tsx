@@ -16,7 +16,7 @@ const NAV_LINKS = [
 ];
 
 export function Navbar() {
-  const { user, isLoading, logout } = useAuth();
+  const { user, isLoading, logout, deleteAccount } = useAuth();
   const pathname = usePathname();
   const router = useRouter();
   const [mobileOpen, setMobileOpen] = useState(false);
@@ -47,6 +47,22 @@ export function Navbar() {
     router.push("/");
   };
 
+  const handleDeleteAccount = async () => {
+    const confirmed = window.confirm(
+      "Are you sure you want to delete your account? This cannot be undone."
+    );
+
+    if (!confirmed) return;
+
+    try {
+      await deleteAccount();
+      router.push("/");
+    } catch {
+      alert("Could not delete account.");
+    }
+  };
+
+
   const NavLinks = ({ onClick }: { onClick?: () => void }) => (
     <>
       {NAV_LINKS.map((link) => (
@@ -72,10 +88,20 @@ export function Navbar() {
     if (user) {
       return (
         <>
-          <span className="text-sm text-muted-foreground flex items-center gap-1.5">
-            <User className="w-4 h-4" />
+          <span className="flex items-center gap-1.5 text-sm text-muted-foreground">
+            <User className="h-4 w-4" />
             {user.username}
           </span>
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={async () => {
+              await handleDeleteAccount();
+              onClick?.();
+            }}
+          >
+            Delete Account
+          </Button>
           <Button
             variant="ghost"
             size="sm"
@@ -84,7 +110,7 @@ export function Navbar() {
               onClick?.();
             }}
           >
-            <LogOut className="w-4 h-4 mr-1" />
+            <LogOut className="mr-1 h-4 w-4" />
             Logout
           </Button>
         </>
@@ -95,19 +121,26 @@ export function Navbar() {
         <Button
           variant="ghost"
           size="sm"
-          onClick={() => { router.push("/sign-in"); onClick?.(); }}
+          onClick={() => {
+            router.push("/sign-in");
+            onClick?.();
+          }}
         >
           Sign In
         </Button>
         <Button
           size="sm"
-          onClick={() => { router.push("/sign-up"); onClick?.(); }}
+          onClick={() => {
+            router.push("/sign-up");
+            onClick?.();
+          }}
         >
           Sign Up
         </Button>
       </>
     );
   };
+
 
   return (
     <header className="fixed top-0 left-0 right-0 z-50 border-b border-border/40 bg-background/80 backdrop-blur-sm">

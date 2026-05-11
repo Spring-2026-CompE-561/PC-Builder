@@ -21,6 +21,8 @@ interface AuthContextType {
   isLoading: boolean;
   login: (token: string) => Promise<void>;
   logout: () => void;
+    deleteAccount: () => Promise<void>;
+
 }
 
 const AuthContext = createContext<AuthContextType | null>(null);
@@ -53,8 +55,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setUser(null);
   };
 
+  const deleteAccount = async () => {
+    await api.delete("/auth/me");
+    clearToken();
+    setUser(null);
+  };
+
+
   return (
-    <AuthContext.Provider value={{ user, isLoading, login, logout }}>
+    <AuthContext.Provider value={{ user, isLoading, login, logout, deleteAccount }}>
       {children}
     </AuthContext.Provider>
   );

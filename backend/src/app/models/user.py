@@ -17,5 +17,10 @@ class User(Base):
     is_active = Column(Boolean, default=True)  # abilty to deactivate account
     created_at = Column(DateTime, default=datetime.utcnow)
 
-    transactions = relationship("Transaction", back_populates="user")
+    transactions = relationship(
+        "Transaction", back_populates="user", cascade="all, delete-orphan"
+    )
+    categories = relationship(
+        "Category", back_populates="user", cascade="all, delete-orphan"
+    )
     builds = relationship("Build", back_populates="user", cascade="all, delete-orphan")

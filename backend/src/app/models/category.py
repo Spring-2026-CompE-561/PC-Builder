@@ -12,3 +12,4 @@ class Category(Base):
     user_id = Column(Integer, ForeignKey("users.id"))
 
     transactions = relationship("Transaction", back_populates="category")
+    user = relationship("User", back_populates="categories")
