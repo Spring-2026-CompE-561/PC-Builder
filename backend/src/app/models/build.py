@@ -18,6 +18,8 @@ import enum
 class UseCase(str, enum.Enum):
     GAMING = "gaming"
     WORKSTATION = "workstation"
+    OFFICE = "office"
+    BUDGET = "budget"
     VIDEO_EDITING = "video_editing"
     PROGRAMMING = "programming"
     GENERAL = "general"
