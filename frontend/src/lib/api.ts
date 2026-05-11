@@ -12,18 +12,28 @@ async function request<T>(
   path: string,
   body?: unknown
 ): Promise<T> {
-  const res = await fetch(`${BASE_URL}${path}`, {
-    method,
-    headers: {
-      "Content-Type": "application/json",
-      ...getAuthHeader(),
-    },
-    body: body ? JSON.stringify(body) : undefined,
-  });
+  let res: Response;
+
+  try {
+    res = await fetch(`${BASE_URL}${path}`, {
+      method,
+      headers: {
+        "Content-Type": "application/json",
+        ...getAuthHeader(),
+      },
+      body: body ? JSON.stringify(body) : undefined,
+    });
+  } catch {
+    throw new Error("Cannot reach the server. Make sure the backend is running.");
+  }
 
   if (!res.ok) {
     const error = await res.json().catch(() => ({ detail: "Request failed" }));
     throw new Error(error.detail || `HTTP ${res.status}`);
+  }
+
+  if (res.status === 204) {
+    return undefined as T;
   }
 
   return res.json();
@@ -36,16 +46,19 @@ export const api = {
   delete: <T>(path: string) => request<T>("DELETE", path),
 };
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL;
+const API_URL = process.env.NEXT_PUBLIC_API_URL || BASE_URL;
 
 export async function apiFetch<T>(path: string): Promise<T> {
-  if (!API_URL) {
-    throw new Error("NEXT_PUBLIC_API_URL is missing");
+  let res: Response;
+  try {
+    res = await fetch(`${API_URL}${path}`, {
+      cache: "no-store",
+    });
+  } catch {
+    throw new Error(
+      `Could not connect to the backend at ${API_URL}. Make sure the FastAPI server is running.`
+    );
   }
-
-  const res = await fetch(`${API_URL}${path}`, {
-    cache: "no-store",
-  });
 
   if (!res.ok) {
     throw new Error(`API request failed: ${res.status}`);

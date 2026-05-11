@@ -12,7 +12,7 @@ export default function PartCard({ part }: { part: Part }) {
           {part.price ? `$${part.price}` : "Price unavailable"}
         </p>
         <p className="mt-1 text-sm text-gray-600">
-          Compatibility: {part.compatibility ?? "See details"}
+          {part.in_stock ? "In stock" : "Out of stock"}
         </p>
       </div>
     </Link>

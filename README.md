@@ -1,5 +1,6 @@
 ﻿# PC Builder
-## Overview 
+
+## Overview
 PC Builder is a website that takes in a user's budget, preferences, and use case, and recommends the best possible PC components. The goal is to simplify the PC buying and building process, especially for beginners.
 
 >MVP: A one-page website where an user can enter a budget and some basic preferences, and get one recommended, compatible PC build with a total price and per-part breakdown, plus a way to export it.
@@ -10,6 +11,7 @@ PC Builder is a website that takes in a user's budget, preferences, and use case
 - Displays total cost and per-part breakdown.
 - Allow users to search for, filter by price and specs, swap parts, and update quantities.
 - Allow users to export builds for later.
+
 ### Optional Upgrades
 - Basic user registration/login, allowing users to view/edit/delete saved builds.
 - Display the most popular parts from users.
@@ -21,7 +23,7 @@ PC Builder is a website that takes in a user's budget, preferences, and use case
 | Layer | Technology |
 |---|---|
 | Frontend | React + Next.js |
-| Design | ShadCN UI + Tailwind CSS | 
+| Design | ShadCN UI + Tailwind CSS |
 | Backend | FastAPI + Pydantic |
 | Database | SQLAlchemy |
 | Server | Uvicorn |
@@ -45,67 +47,38 @@ py -m pip install -U pip pre-commit
 pre-commit install
 
 pre-commit run --all-files
+
 ```
 
-### Setup Virtual Environment
+## Final Run Instructions
 
-```powershell
-powershell -ExecutionPolicy ByPass -c "irm https://astral.sh/uv/install.ps1 | iex"
-
-uv venv
-
-.venv\Scripts\activate
-
-uv pip install -e ./backend
-```
-In VS Code, make sure the Python interpreter is set to the one in .venv\scripts\activate
-
-### Authentication
-- `python-jose` for JWT creation/verification.
-- `passlib` for password hashing.
-
-### Middleware
-- CORS to allow the frontend to connect with the backend.
-- Request logging.
-
-## Running the Backend
-After creating and activating the virtual environment and installing dependencies, run the backend from the project root with:
-
+### Backend
 ```bash
-PYTHONPATH=backend/src python -m uvicorn backend.main:app --reload
+DATABASE_URL="postgresql://postgres@localhost:5433/pcbuilder" PYTHONPATH=backend/src uv run uvicorn backend.main:app --reload
 ```
 
-
-Once the server is running, open:
-- `http://127.0.0.1:8000/docs` for Swagger UI
-- `http://127.0.0.1:8000/` for the root endpoint
-
-## Testing the API
-
-### Manual API Testing
-The API endpoints were tested using Swagger UI and `curl`.
-
-Verified endpoints include:
-- `GET /`
-- `POST /auth/register`
-- `POST /auth/login`
-- `GET /auth/me`
-- `GET /users/`
-- `GET /users/{id}`
-- `PUT /users/{id}`
-- `DELETE /users/{id}`
-- `GET /categories/`
-- `POST /categories/`
-- `GET /transactions/`
-- `POST /transactions/`
-
-### Automated Tests
-Pytest tests are located in:
-- `backend/tests/test_auth_and_users.py`
-- `backend/tests/test_categories_and_transactions.py`
-
-Run all backend tests with:
-
+### Frontend
 ```bash
-PYTHONPATH=backend/src python -m pytest backend/tests/test_auth_and_users.py backend/tests/test_categories_and_transactions.py -v
+cd frontend
+npm run dev -- --webpack
 ```
+
+## Testing
+
+### Backend Tests
+```bash
+DATABASE_URL="postgresql://postgres@localhost:5433/pcbuilder" PYTHONPATH=backend/src uv run pytest backend/tests --cov=backend/src/app --cov-report=term-missing
+```
+
+Verified result:
+- `8` backend tests passed
+- `76%` coverage
+
+### Playwright Tests
+```bash
+cd frontend
+npm run test:e2e
+```
+
+Verified result:
+- `2` Playwright tests passed

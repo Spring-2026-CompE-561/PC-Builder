@@ -1,5 +1,0 @@
-Authentication related README changes:
-
-uv pip install python-jose[cryptography] passlib[bcrypt]
-
-add information on JWT, CORS, and logging

@@ -13,6 +13,7 @@ class PartOut(BaseModel):
     image_url: Optional[str] = None
     price: Optional[float] = None
     in_stock: Optional[bool] = None
+    compatibility: Optional[str] = None
 
     model_config = {"from_attributes": True}
 

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -11,20 +11,60 @@ import { api } from "@/lib/api";
 import Link from "next/link";
 
 interface RegisterResponse {
+  id: number;
+}
+
+interface LoginResponse {
   access_token: string;
   token_type: string;
 }
 
+function getPasswordStrength(password: string): {
+  score: number;
+  label: string;
+  color: string;
+} {
+  if (!password) return { score: 0, label: "", color: "" };
+
+  let score = 0;
+  if (password.length >= 8) score++;
+  if (password.length >= 12) score++;
+  if (/[A-Z]/.test(password) && /[a-z]/.test(password)) score++;
+  if (/[0-9]/.test(password)) score++;
+  if (/[^A-Za-z0-9]/.test(password)) score++;
+
+  score = Math.min(score, 4);
+
+  const levels = [
+    { label: "Too short", color: "#ef4444" },
+    { label: "Weak",      color: "#f97316" },
+    { label: "Fair",      color: "#eab308" },
+    { label: "Good",      color: "#3b82f6" },
+    { label: "Strong",    color: "#22c55e" },
+  ];
+
+  return { score, ...levels[score] };
+}
+
 export default function SignUpPage() {
-  const { login } = useAuth();
+  const { login, user, isLoading: authLoading } = useAuth();
   const router = useRouter();
 
+  const [name, setName] = useState("");
   const [username, setUsername] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
+
+  const strength = getPasswordStrength(password);
+  const passwordsMatch = confirmPassword.length > 0 && password === confirmPassword;
+  const passwordsMismatch = confirmPassword.length > 0 && password !== confirmPassword;
+
+  useEffect(() => {
+    if (!authLoading && user) router.push("/");
+  }, [user, authLoading, router]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -43,15 +83,22 @@ export default function SignUpPage() {
     setIsLoading(true);
 
     try {
-      const data = await api.post<RegisterResponse>("/auth/register", {
+      await api.post<RegisterResponse>("/auth/register", {
+        name,
         username,
+        email,
+        password,
+      });
+      const data = await api.post<LoginResponse>("/auth/login", {
         email,
         password,
       });
       await login(data.access_token);
       router.push("/");
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Registration failed. Please try again.");
+      setError(
+        err instanceof Error ? err.message : "Registration failed. Please try again."
+      );
     } finally {
       setIsLoading(false);
     }
@@ -72,6 +119,19 @@ export default function SignUpPage() {
                 {error}
               </div>
             )}
+
+            <div className="space-y-2">
+              <Label htmlFor="name">Name</Label>
+              <Input
+                id="name"
+                type="text"
+                placeholder="First Last"
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+                required
+                autoComplete="name"
+              />
+            </div>
 
             <div className="space-y-2">
               <Label htmlFor="username">Username</Label>
@@ -110,6 +170,28 @@ export default function SignUpPage() {
                 required
                 autoComplete="new-password"
               />
+
+              {password.length > 0 && (
+                <div className="space-y-1 pt-1">
+                  <div className="flex gap-1">
+                    {[1, 2, 3, 4].map((level) => (
+                      <div
+                        key={level}
+                        style={{
+                          height: "6px",
+                          flex: 1,
+                          borderRadius: "9999px",
+                          transition: "background-color 0.3s",
+                          backgroundColor: strength.score >= level ? strength.color : "#e5e7eb",
+                        }}
+                      />
+                    ))}
+                  </div>
+                  <p className="text-xs" style={{ color: strength.color }}>
+                    {strength.label}
+                  </p>
+                </div>
+              )}
             </div>
 
             <div className="space-y-2">
@@ -122,7 +204,20 @@ export default function SignUpPage() {
                 onChange={(e) => setConfirmPassword(e.target.value)}
                 required
                 autoComplete="new-password"
+                style={
+                  passwordsMismatch
+                    ? { borderColor: "#ef4444" }
+                    : passwordsMatch
+                    ? { borderColor: "#22c55e" }
+                    : {}
+                }
               />
+              {passwordsMismatch && (
+                <p className="text-xs" style={{ color: "#ef4444" }}>Passwords do not match</p>
+              )}
+              {passwordsMatch && (
+                <p className="text-xs" style={{ color: "#22c55e" }}>Passwords match</p>
+              )}
             </div>
           </CardContent>
 
@@ -132,7 +227,10 @@ export default function SignUpPage() {
             </Button>
             <p className="text-sm text-muted-foreground text-center">
               Already have an account?{" "}
-              <Link href="/sign-in" className="text-foreground underline underline-offset-4 hover:text-primary">
+              <Link
+                href="/sign-in"
+                className="text-foreground underline underline-offset-4 hover:text-primary"
+              >
                 Sign in
               </Link>
             </p>
